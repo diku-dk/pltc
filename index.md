@@ -1,9 +1,9 @@
-# Programming Languages and Theory of Computing
+## Programming Languages and Theory of Computing
 
-## People
+### People
 
 [See the official employee list](https://di.ku.dk/english/staff/vip/researchers_pltc/)
 
-## Projects
+### Projects
 
-## Student project suggestions
+### Student project suggestions
