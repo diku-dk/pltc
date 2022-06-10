@@ -38,6 +38,27 @@ Systems*](https://studies.ku.dk/masters/computer-science/programme-structure/rec
 
 TBA
 
-### Student project suggestions
+### Suggestions for bachelors projects, masters projects, or POCS
 
-TBA
+#### Futhark-related projects
+
+[Futhark](https://futhark-lang.org) is a research language developed
+by various PLTC researchers.  See [this curated list of GitHub
+issues](https://github.com/diku-dk/futhark/issues?q=is%3Aopen+is%3Aissue+label%3Astudent-viable)
+for suggestions on projects related to working on the compiler itself.
+Contact [Troels Henriksen](https://sigkill.dk), [Cosmin
+Oancea](http://hjemmesider.diku.dk/~zgh600/), or [Martin
+Elsman](https://elsman.com/) if you wish to work on one of thse.
+
+#### GPU programming
+
+The [Problem Based Benchmark
+Suite](https://github.com/cmuparlay/pbbsbench) is a collection of
+benchmark programs that implement various algorithms using parallel
+programming.  Currently only implementations for multicore CPUs are
+supported.  It would be interesting to port some of these benchmarks
+to low-level GPU programming languages, such as CUDA.  While some of
+the benchmark programs are fairly trivial, others are highly irregular
+and will require some cleverness to implement efficiently on GPUs.
+This means the size of the project can be adjusted based on the time
+available.
