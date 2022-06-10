@@ -1,4 +1,4 @@
-## Programming Languages and Theory of Computation
+## Introduction
 
 Welcome to the PLTC Section. We perform research in programming
 language technology and in the theory of computation. Much of our work
