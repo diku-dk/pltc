@@ -61,4 +61,4 @@ to low-level GPU programming languages, such as CUDA.  While some of
 the benchmark programs are fairly trivial, others are highly irregular
 and will require some cleverness to implement efficiently on GPUs.
 This means the size of the project can be adjusted based on the time
-available.
+available. Contact: [Troels Henriksen](https://sigkill.dk).
