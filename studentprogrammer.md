@@ -1,4 +1,6 @@
-## Hiring a student programmer
+---
+title: Open position for a student programmer
+---
 
 I (Troels Henriksen) am looking to hire a student programmer to work
 on [Futhark](https://futhark-lang.org)-related code, with a particular
