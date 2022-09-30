@@ -29,7 +29,7 @@ Javascript.
 The position is funded by [this DIREC
 grant](https://direc.dk/ergonomic-practical-effect-systems/).  For
 more information, or if you are interested in this position, write
-Troels at athas@sigkill.dk
+Troels <athas@sigkill.dk>.
 
 ### Hours
 
