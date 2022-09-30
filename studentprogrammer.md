@@ -1,7 +1,7 @@
-## Looking for a student programmer
+## Hiring a student programmer
 
-I (Troels Henriksen) am looking for a student programmer to work on
-[Futhark](https://futhark-lang.org)-related code, with a particular
+I (Troels Henriksen) am looking to hire a student programmer to work
+on [Futhark](https://futhark-lang.org)-related code, with a particular
 focus on building tools and infrastructure, including tasks such as:
 
 * Creating a GitHub Actions runner so that we can run Github Actions
