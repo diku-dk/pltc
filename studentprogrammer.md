@@ -10,7 +10,8 @@ focus on building tools and infrastructure, including tasks such as:
 * Creating an online REPL to make it easier to demonstrate the
   language.
 
-* Possibly more as time and resources permit.
+* Possibly more as time and resources permit, based on the needs of
+  the research group.
 
 * Improving our tools for visualising and analysing performance
   measurements.
@@ -18,9 +19,10 @@ focus on building tools and infrastructure, including tasks such as:
 The position is not research- or compiler-related, and does not
 require any experience with Futhark or any skill with functional or
 parallel programming at all.  It does however require you to be a
-somewhat capable programmer already - it is a job, not a learning
-project.  I expect that most of the programming will be done with
-common languages such as Python, Go, Elm, or Javascript.
+competent programmer already.  You will work in collaboration with the
+rest of the research group, and I expect that most of the programming
+will be done with common languages such as Python, Go, Elm, or
+Javascript.
 
 The position is funded by [this DIREC
 grant](https://direc.dk/ergonomic-practical-effect-systems/).  For
