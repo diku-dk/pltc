@@ -15,6 +15,11 @@ distributed ledger technology, and fintech).
 
 * [List of publications](https://di.ku.dk/english/research/pltc/publikationer/publikationsliste/?pure=en/organisations/by-uuid(a37efafe-316d-489f-8082-621e025b2f73)/publications.html)
 
+### Location
+
+The PLTC Section is located on the [ground floor of HCØ, in Building B](/images/office-plan.png),
+Universitetsparken 5, DK-2100 Copenhagen.
+
 ### Research interests
 
 We perform research in programming language technology (including ties
