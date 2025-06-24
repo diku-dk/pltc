@@ -77,7 +77,7 @@ Here is an overview of topics and reseacher competences:
 
 - __Systems and hardware-near programming.__ _(Philippe Bonnet)_. Related courses: ...
 
-_ __Finance, contracts, and distributed systems.__ _(Omry Ross, Fritz
+- __Finance, contracts, and distributed systems.__ _(Omry Ross, Fritz
   Henglein)_. Related courses: DATFIN, Blockchain.
 
 
