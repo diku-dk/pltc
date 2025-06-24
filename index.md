@@ -42,7 +42,7 @@ Communication & IT. For the MSc programme, we are primarily involved in [the stu
 *Programming Language and
 Systems*](https://studies.ku.dk/masters/computer-science/programme-structure/recommended_studytracks/).
 
-## Project Supervision
+## Project supervision
 
 PLTC researchers conduct project supervision spanning both BSc level and MSc
 level supervision and spanning all kinds of projects, including thesis projects, POCS
@@ -75,13 +75,16 @@ Here is an overview of topics and reseacher competences:
 - __Security and language-based security.__ _(Boel Nelson, Thomas Jensen,
   Andrzej Filinski)_. Related courses: ITS, SOS, PCS.
 
-- __Systems and hardware-near programming.__ _(Philippe Bonnet)_. Related courses: ...
+- __Systems and hardware-near programming.__ _(Philippe Bonnet)_. Related
+  courses: COMPSYS, HPPS, ACS, DIS.
 
 - __Finance, contracts, and distributed systems.__ _(Omry Ross, Fritz
   Henglein)_. Related courses: DATFIN, Blockchain.
 
+If you are looking for a BSc project supervisor, please contact one of the above
+listed researchers, depending on the topic.
 
-## Detailed Suggestions for bachelors projects, masters projects, or POCS
+## Detailed suggestions for bachelors projects, masters projects, or POCS
 
 ### Futhark-related projects
 
