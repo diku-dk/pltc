@@ -15,12 +15,12 @@ distributed ledger technology, and fintech).
 
 * [List of publications](https://di.ku.dk/english/research/pltc/publikationer/publikationsliste/?pure=en/organisations/by-uuid(a37efafe-316d-489f-8082-621e025b2f73)/publications.html)
 
-### Location
+## Location
 
 The PLTC Section is located on the [ground floor of HCØ, in Building B](/images/office-plan.png),
 Universitetsparken 5, DK-2100 Copenhagen.
 
-### Research interests
+## Research interests
 
 We perform research in programming language technology (including ties
 to program analysis, type systems and transformation, compiler and
@@ -34,20 +34,56 @@ languages and theory (e.g., algorithmic aspects of programming and
 formal verification), and applications (e.g., computer security and
 privacy, systems, distributed ledger technology, and Fintech).
 
-### Teaching
+## Teaching
 
-We offer courses for the bachelor and master's programmes in Computer
-Science and Communication & IT. For the MSc programme, we suggest [the
-study tracks in *Programming Language and
+We offer courses for the bachelor and master's programmes in Computer Science,
+Computer Science and Economics, Machine-learning & Datascience, and
+Communication & IT. For the MSc programme, we are primarily involved in [the study track in
+*Programming Language and
 Systems*](https://studies.ku.dk/masters/computer-science/programme-structure/recommended_studytracks/).
 
-### Projects
+## Project Supervision
 
-TBA
+PLTC researchers conduct project supervision spanning both BSc level and MSc
+level supervision and spanning all kinds of projects, including thesis projects, POCS
+(project out of course scope), PREP (thesis preparation project), and projects
+involving external institutions or companies (for such projects it is in general
+assumed that students them selves come with collaboration ideas).
 
-### Suggestions for bachelors projects, masters projects, or POCS
+Here is an overview of topics and reseacher competences:
 
-#### Futhark-related projects
+- __Compilation and optimisation.__ _(Torben Mogensen, Cosmin Oancea, Martin
+  Elsman, Troels Henriksen)_. Related courses: PMPH, PLD, IPS.
+
+- __Type systems and type inference.__ _(Andrzej Filinski, Troels Henriksen,
+  Martin Elsman, Robert Glück, Torben Mogensen)_. Related courses: SAT.
+
+- __Data-parallel and GPU programming.__ _(Cosmin Oancea, Troels Henriksen, Martin
+  Elsman)_. Related courses: PMPH, DPP.
+
+- __Reversible languages__. _(Robert Glück, Torben Mogensen, Michael Kirkedal
+  Thomsen)_. Related courses: PAT.
+
+- __Quantum computing__. _(Fritz Henglein, Martin Elsman, Michael Kirkedal
+  Thomsen)_. Related courses: ATPL.
+
+- __High-performance computing.__ _(Cosmin Oancea, James Avery, David
+  Marchant)_. Related courses: PMPH, COMPSYS, HPPS.
+
+- __Probabilistic programming.__ _(Thomas Hamelryck)_. Related courses: ...
+
+- __Security and language-based security.__ _(Boel Nelson, Thomas Jensen,
+  Andrzej Filinski)_. Related courses: ITS, SOS, PCS.
+
+- __Systems and hardware-near programming.__ _(Philippe Bonnet)_. Related courses: ...
+
+_ __Finance, contracts, and distributed systems.__ _(Omry Ross, Fritz
+  Henglein)_. Related courses: DATFIN, Blockchain.
+
+
+## Detailed Suggestions for bachelors projects, masters projects, or POCS
+
+### Futhark-related projects
 
 [Futhark](https://futhark-lang.org) is a research language developed
 by various PLTC researchers.  See [this curated list of GitHub
@@ -57,7 +93,7 @@ Contact [Troels Henriksen](https://sigkill.dk), [Cosmin
 Oancea](http://hjemmesider.diku.dk/~zgh600/), or [Martin
 Elsman](https://elsman.com/) if you wish to work on one of thse.
 
-#### GPU programming
+### GPU programming
 
 The [Problem Based Benchmark
 Suite](https://github.com/cmuparlay/pbbsbench) is a collection of
