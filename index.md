@@ -63,11 +63,8 @@ Here is an overview of topics and reseacher competences:
 - __Data-parallel and GPU programming.__ _(Cosmin Oancea, Troels Henriksen, Martin
   Elsman)_. Related courses: PMPH, DPP.
 
-- __Reversible languages__. _(Robert Glück, Torben Mogensen, Michael Kirkedal
-  Thomsen)_. Related courses: PAT.
-
-- __Quantum computing__. _(Fritz Henglein, Martin Elsman, Michael Kirkedal
-  Thomsen)_. Related courses: ATPL.
+- __Reversible languages and quantum computing__. _(Robert Glück, Torben Mogensen, Michael Kirkedal
+  Thomsen, Fritz Henglein, Martin Elsman)_. Related courses: PAT, ATPL.
 
 - __High-performance computing.__ _(Cosmin Oancea, James Avery, David
   Marchant)_. Related courses: PMPH, COMPSYS, HPPS.
@@ -84,7 +81,8 @@ Here is an overview of topics and reseacher competences:
   Henglein)_. Related courses: DATFIN, Blockchain.
 
 If you are looking for a BSc project supervisor, please contact one of the above
-listed researchers, depending on the topic.
+listed researchers, depending on the topic. Detailed contact information is
+available at the [PLTC section members page](https://di.ku.dk/english/staff/vip/researchers_pltc/).
 
 ## Detailed suggestions for bachelors projects, masters projects, or POCS
 
@@ -96,7 +94,7 @@ issues](https://github.com/diku-dk/futhark/issues?q=is%3Aopen+is%3Aissue+label%3
 for suggestions on projects related to working on the compiler itself.
 Contact [Troels Henriksen](https://sigkill.dk), [Cosmin
 Oancea](http://hjemmesider.diku.dk/~zgh600/), or [Martin
-Elsman](https://elsman.com/) if you wish to work on one of thse.
+Elsman](https://elsman.com/) if you wish to work on one of these.
 
 ### Troels-related projects
 

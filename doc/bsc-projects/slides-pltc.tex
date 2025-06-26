@@ -1,0 +1,195 @@
+\documentclass[rgb,dvipsnames,aspectratio=169]{beamer}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{adjustbox}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{amsfonts}
+\usepackage{url}
+\usepackage[linewidth=1pt]{mdframed}
+\usepackage{alltt}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{calc,shapes.multipart,chains,arrows,patterns}
+\usepackage{paratype}
+\setbeamerfont{frametitle}{family=\bf}
+\usepackage{pgfplots}
+
+\usecolortheme{seagull}
+\usecolortheme{whale}
+\setbeamertemplate{itemize item}{\raisebox{0.8mm}{\rule{1.2mm}{1.2mm}}}
+\usenavigationsymbolstemplate{} % no navigation buttons
+
+\input{util.tex}
+\setallthemecolors{navy}
+
+\useoutertheme{infolines}
+\useinnertheme{rectangles}
+
+\title{PLTC BSc Projects 2025}
+
+\author[Martin Elsman]{Martin Elsman}
+\institute[PLTC]{PLTC Section, DIKU}
+
+\date[June 27, 2025]{{June 27, 2025}\makebox(0,0){\vspace{0cm}\hspace{7cm}\begin{tabular}{c}\includegraphics[width=6cm]{hco}\end{tabular}}
+  \makebox(0,0){\vspace{0.5cm}\hspace{-12.5cm}\large BSc Project Event}
+  \makebox(0,0){\vspace{-0.5cm}\hspace{-12.5cm}\large Fall 2025}
+}
+
+\setbeamertemplate{headline}{}
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}[fragile]
+\head{The PLTC Section}
+
+\vfill
+
+\begin{itemize}
+\item We perform research in programming language technology and in the theory of computation.
+
+\vfill
+
+\item Much of our work involves topics in the intersection of
+
+\vfill
+\begin{center}
+
+\textbf{\large programming language theory}
+
+(e.g., type systems, compilers, and formal verification)
+
+\vfill
+
+and
+
+\vfill
+
+\textbf{\large applications}
+
+(e.g., security and privacy, systems,
+distributed ledgers, fintech, quantum)
+\end{center}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+  \head{Programming Languages Are Tools But They Are Also Research Objects!}
+
+  \vfill
+
+\begin{verbatim}
+How should we implement and design good programming languages?
+What does "good" mean?
+
+What does correctness mean?
+
+What does it take for software to be secure?
+
+How can we organize parallel computations optimally?
+
+What does "optimal" mean?
+
+(...)
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+  \head{Research Interests (I)}
+
+  \vfill
+
+  \begin{itemize}
+  \item Compilation and optimisation.
+    \emph{(Torben Mogensen, Cosmin Oancea, Martin Elsman, Troels Henriksen, Andrzej Filinski).}
+
+    Related courses: PMPH, PLD, IPS.
+
+  \item Logic and Semantics.
+    \emph{(Andrzej Filinski, Robert Glück, …).}
+
+    Related courses: LiCS, SaT.
+
+  \item Type systems and type inference.
+    \emph{(Andrzej Filinski, Troels Henriksen, Martin Elsman, Robert Glück, Torben Mogensen).}
+
+    Related courses: SaT.
+
+  \item Data-parallel and GPU programming.
+    \emph{(Cosmin Oancea, Troels Henriksen, Martin Elsman).}
+
+    Related courses: PMPH, DPP.
+
+  \item Reversible languages and quantum computing.
+    \emph{(Robert Glück, Torben Mogensen, Michael Kirkedal Thomsen, Fritz Henglein, Martin Elsman).}
+
+    Related courses: PAT, ATPL.
+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+
+  \head{Research Interests (II)}
+
+  \vfill
+
+  \begin{itemize}
+
+  \item High-performance computing.
+    \emph{(Cosmin Oancea, James Avery, David Marchant).}
+
+    Related courses: PMPH, COMPSYS, HPPS.
+
+  \item Probabilistic programming.
+    \emph{(Thomas Hamelryck).}
+
+    Related courses: …
+
+  \item Security and language-based security.
+    \emph{(Boel Nelson, Thomas Jensen, Andrzej Filinski).}
+
+    Related courses: ITS, SOS, PCS.
+
+  \item Systems and hardware-near programming.
+    \emph{(Philippe Bonnet).}
+
+    Related courses: COMPSYS, HPPS, ACS, DIS.
+
+  \item Finance, contracts, and distributed systems.
+    \emph{(Omry Ross, Fritz Henglein).}
+
+    Related courses: DATFIN, Blockchain.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+  \head{More Information}
+
+  \vfill
+  \begin{itemize}
+  \item \textbf{PLTC Web Pages:}
+
+    \url{https://di.ku.dk/english/research/pltc/} (official)
+
+    \url{https://diku-dk.github.io/pltc/} (internal)
+
+    \vfill
+
+  \item \textbf{PLTC Researchers:}
+
+    \url{https://di.ku.dk/english/staff/vip/researchers_pltc/}
+
+  \end{itemize}
+
+\end{frame}
+\end{document}
