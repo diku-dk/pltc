@@ -53,10 +53,12 @@ assumed that students them selves come with collaboration ideas).
 Here is an overview of topics and reseacher competences:
 
 - __Compilation and optimisation.__ _(Torben Mogensen, Cosmin Oancea, Martin
-  Elsman, Troels Henriksen)_. Related courses: PMPH, PLD, IPS.
+  Elsman, Troels Henriksen, Andrzej Filinski)_. Related courses: PMPH, PLD, IPS.
+
+- __Logic and Semantics__ _(Andrzej Filinski, Robert Glück, ...)_. Related courses: LiCS, SaT
 
 - __Type systems and type inference.__ _(Andrzej Filinski, Troels Henriksen,
-  Martin Elsman, Robert Glück, Torben Mogensen)_. Related courses: SAT.
+  Martin Elsman, Robert Glück, Torben Mogensen)_. Related courses: SaT.
 
 - __Data-parallel and GPU programming.__ _(Cosmin Oancea, Troels Henriksen, Martin
   Elsman)_. Related courses: PMPH, DPP.
