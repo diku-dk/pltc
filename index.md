@@ -98,15 +98,6 @@ Contact [Troels Henriksen](https://sigkill.dk), [Cosmin
 Oancea](http://hjemmesider.diku.dk/~zgh600/), or [Martin
 Elsman](https://elsman.com/) if you wish to work on one of thse.
 
-### GPU programming
+### Troels-related projects
 
-The [Problem Based Benchmark
-Suite](https://github.com/cmuparlay/pbbsbench) is a collection of
-benchmark programs that implement various algorithms using parallel
-programming.  Currently only implementations for multicore CPUs are
-supported.  It would be interesting to port some of these benchmarks
-to low-level GPU programming languages, such as CUDA.  While some of
-the benchmark programs are fairly trivial, others are highly irregular
-and will require some cleverness to implement efficiently on GPUs.
-This means the size of the project can be adjusted based on the time
-available. Contact: [Troels Henriksen](https://sigkill.dk).
+[See Troels Henriksens list of project proposals.](https://hjemmesider.diku.dk/~athas/#proposals)
