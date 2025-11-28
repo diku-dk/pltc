@@ -80,6 +80,9 @@ Here is an overview of topics and reseacher competences:
 - __Finance, contracts, and distributed systems.__ _(Omry Ross, Fritz
   Henglein)_. Related courses: DATFIN, Blockchain.
 
+- __Domain-specific languages for X.__ _(Fritz Henglein, Martin Elsman,
+  Torben Mogensen, Troels Henriksen, Andrzej Filinski, ...)_. Related courses: SaT, PLD, IPL, ... Topics: Animation, Financial contracts, Music, ...
+
 If you are looking for a BSc project supervisor, please contact one of the above
 listed researchers, depending on the topic. Detailed contact information is
 available at the [PLTC section members page](https://di.ku.dk/english/staff/vip/researchers_pltc/).
