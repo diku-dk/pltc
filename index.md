@@ -15,6 +15,8 @@ distributed ledger technology, and fintech).
 
 * [List of publications](https://di.ku.dk/english/research/pltc/publikationer/publikationsliste/?pure=en/organisations/by-uuid(a37efafe-316d-489f-8082-621e025b2f73)/publications.html)
 
+* [PLTC research groups](/groups/)
+
 ## Location
 
 The PLTC Section is located on the [ground floor of HCØ, in Building B](/images/office-plan.png),
@@ -33,6 +35,8 @@ Much of our work involves topics in the intersection of programming
 languages and theory (e.g., algorithmic aspects of programming and
 formal verification), and applications (e.g., computer security and
 privacy, systems, distributed ledger technology, and Fintech).
+
+See our brief descriptions of the [PLTC research groups](/groups)
 
 ## Teaching
 
