@@ -7,7 +7,7 @@ language technology and in the theory of computation. Much of our work
 involves topics in the intersection of programming language theory
 (e.g., algorithmic aspects of programming and formal verification),
 and applications (e.g., computer security and privacy, systems,
-distributed ledger technology, and fintech).
+distributed ledger technology, and Fintech).
 
 * [Our page on diku.dk](https://di.ku.dk/english/research/pltc/)
 
@@ -15,7 +15,7 @@ distributed ledger technology, and fintech).
 
 * [List of publications](https://di.ku.dk/english/research/pltc/publikationer/publikationsliste/?pure=en/organisations/by-uuid(a37efafe-316d-489f-8082-621e025b2f73)/publications.html)
 
-* [PLTC research groups](/groups/)
+* [PLTC research groups](/pltc/groups/)
 
 ## Location
 
@@ -36,12 +36,12 @@ languages and theory (e.g., algorithmic aspects of programming and
 formal verification), and applications (e.g., computer security and
 privacy, systems, distributed ledger technology, and Fintech).
 
-See our brief descriptions of the [PLTC research groups](/groups)
+See our brief descriptions of the [PLTC research groups](/pltc/groups).
 
 ## Teaching
 
 We offer courses for the bachelor and master's programmes in Computer Science,
-Computer Science and Economics, Machine-learning & Datascience, and
+Computer Science and Economics, Machine-learning & Data-science, and
 Communication & IT. For the MSc programme, we are primarily involved in [the study track in
 *Programming Language and
 Systems*](https://studies.ku.dk/masters/computer-science/programme-structure/recommended_studytracks/).
@@ -54,7 +54,7 @@ level supervision and spanning all kinds of projects, including thesis projects,
 involving external institutions or companies (for such projects it is in general
 assumed that students them selves come with collaboration ideas).
 
-Here is an overview of topics and reseacher competences:
+Here is an overview of topics and researcher competences:
 
 - __Compilation and optimisation.__ _(Torben Mogensen, Cosmin Oancea, Martin
   Elsman, Troels Henriksen, Andrzej Filinski)_. Related courses: PMPH, PLD, IPS.
