@@ -15,7 +15,7 @@ distributed ledger technology, and Fintech).
 
 * [List of publications](https://di.ku.dk/english/research/pltc/publikationer/publikationsliste/?pure=en/organisations/by-uuid(a37efafe-316d-489f-8082-621e025b2f73)/publications.html)
 
-* [PLTC research groups](/pltc/groups/)
+* [PLTC research groups](/pltc/groups)
 
 ## Location
 
