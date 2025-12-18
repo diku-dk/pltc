@@ -89,7 +89,8 @@ Here is an overview of topics and researcher competences:
 
 If you are looking for a BSc project supervisor, please contact one of the above
 listed researchers, depending on the topic. Detailed contact information is
-available at the [PLTC section members page](https://di.ku.dk/english/staff/vip/researchers_pltc/).
+available at the [PLTC section members page](https://di.ku.dk/english/staff/vip/researchers_pltc/). In searching for a
+project supervisor, you may also want to read the descriptions of the [PLTC research sections](/pltc/groups).
 
 ## Detailed suggestions for bachelors projects, masters projects, or POCS
 
