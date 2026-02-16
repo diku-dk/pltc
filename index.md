@@ -24,17 +24,17 @@ Universitetsparken 5, DK-2100 Copenhagen.
 
 ## Research interests
 
-We perform research in programming language technology (including ties
-to program analysis, type systems and transformation, compiler and
-language design, high-performance computing, and meta-programming),
-and in the theory of computation (including ties to automata and
-computability theory, logic, term rewriting and lambda calculus, and
-reversible and quantum computing).
+We conduct research in programming language technology (including program
+analysis, type systems, program transformation, compiler and language design,
+high-performance computing, and meta-programming), and in the theory of
+computation (including computability theory, logic, term rewriting and lambda
+calculus, and reversible and quantum computing).
 
-Much of our work involves topics in the intersection of programming
-languages and theory (e.g., algorithmic aspects of programming and
-formal verification), and applications (e.g., computer security and
-privacy, systems, distributed ledger technology, and Fintech).
+Much of our work involves topics in the intersection of programming languages
+and theory (e.g., algorithmic aspects of programming and formal verification),
+high-performance compiler technology for different architectures (e.g.,
+data-parallel architectures, such as GPUs) and applications (e.g., computer
+security and privacy, systems, distributed ledger technology, and Fintech).
 
 See our brief descriptions of the [PLTC research groups](/pltc/groups).
 

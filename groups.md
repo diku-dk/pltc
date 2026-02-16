@@ -12,18 +12,19 @@ several groups.
 
 We research and develop foundations, technology and applications of efficient
 and secure networked/distributed computer systems controlled by multiple
-independent principals.  This includes blockchain and distributed ledger
-technology, event-driven architectures, large-scale transaction processing and
-analytics (Big Data), streaming and real-time data processing, domain-specific
-languages embodying domain knowledge and deep computer science techniques,
-digital and smart contract technology, and more.  _(Fritz Henglein, Omri Ross)_
+independent principals.  Areas of interest include blockchain and distributed
+ledger technology, event-driven architectures, large-scale transaction
+processing and analytics (Big Data), streaming and real-time data processing,
+domain-specific languages embodying domain knowledge and deep computer science
+techniques, digital and smart contract technology, and more.  _(Fritz Henglein,
+Omri Ross)_
 
 ## Security & Privacy
 
 We work primarily on software-based security and privacy preservation techniques
 and applications. Emerging research topics are quantum cryptography and
-compositional safety and security models for industrial systems.  _(Ken Friis
-Larsen, Thomas Jensen, Andrzej Filinski)_
+compositional safety and security models for industrial systems.  _(Andrzej Filinski, Thomas Jensen, Ken Friis
+Larsen, Boel Nelson)_
 
 ## HOT Lab
 
@@ -83,4 +84,4 @@ financial markets more transparent and inclusive.  _(Omri Ross)_
 
 The Quantum Programming Group studies the design and use of programming
 languages in the context of quantum computing.  _(James Avery, Michael Kirkedal
-Thomasen, Fritz Henglein, Thomas Jensen)_
+Thomsen, Fritz Henglein, Thomas Jensen)_
