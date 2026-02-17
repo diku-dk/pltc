@@ -117,7 +117,7 @@ val Smap = [
     "*  H%%HOOOOOOOOOOOOOH%%H       ***********                               L                    T           T   *",
     "*       L                      *                                                                    T         *",
     "*                           P  *                   %                                                          *",
-    "********************************%%%%%%%%%%%%%%%%%%%%%%%%%%%%%HHHHHH%%%%%%%%HHHHHHHH%%%%%%HHHHHHH%%%%%%HHHHHHH**"
+    "********************************%%%%%%%%%%%%%M%%%%%%%%%%%%%%%HHHHHH%%%%%%%%HHHHHHHH%%%%%%HHHHHHH%%%%%%HHHHHHH**"
 ]
 
 local
@@ -131,6 +131,7 @@ local
       | #"m" => 3
       | #"%" => 3
       | #"H" => 4
+      | #"M" => 5
       | #"T" => 100
       | #"A" => 101
       | #"P" => 102
@@ -144,13 +145,13 @@ end
 
 structure Sprite = struct
 
-datatype kind = Table | Armor | Plant | Lamp | Coin | Bread
+datatype kind = Table | Professor | Plant | Lamp | Coin | Bread
 
 fun toKind i =
     let open MapObj
     in if not (isSprite i) then NONE
        else if i = T then SOME Table
-       else if i = A then SOME Armor
+       else if i = A then SOME Professor
        else if i = P then SOME Plant
        else if i = L then SOME Lamp
        else if i = C then SOME Coin
@@ -161,7 +162,7 @@ fun toKind i =
 fun blocking k =
     case k of
       Table => true
-    | Armor => true
+    | Professor => true
     | Plant => true
     | Lamp => false
     | Coin => false
@@ -170,9 +171,9 @@ fun blocking k =
 fun img k (p:int*int) =
     case k of
         Table => "tablechairs.png"
-      | Armor => let val i = ((#1 p + #2 p) mod 4 + 1)
-                 in "professor" ^ Int.toString i ^ ".gif"
-                 end
+      | Professor => let val i = ((#1 p + #2 p) mod 4 + 1)
+                     in "professor" ^ Int.toString i ^ ".gif"
+                     end
       | Plant => "plantgreen.png"
       | Lamp => "lamp.png"
       | Coin => "score.png"
@@ -227,7 +228,7 @@ val miniMapScale   = 8
 val miniMapScaleR  = real miniMapScale
 val screenWidthR   = real screenWidth
 val screenHeightR  = real screenHeight
-val stripWidth     = 2
+val stripWidth     = 1
 val stripWidthR    = real stripWidth
 val fov            = 60.0 * Math.pi / 180.0
 val numRays        = Real.ceil(screenWidthR / stripWidthR)
@@ -348,7 +349,7 @@ fun getElemProperty e t s =
 
 val minimap_p = true
 
-fun updateMiniMap() =
+fun updateMiniMap () =
     if not minimap_p then ()
     else
     let val miniMap = $ "minimap"
@@ -431,32 +432,39 @@ fun drawMiniMap () =
 	updateMiniMap()
     end
 
-fun RealMod(r:real,m) =
+fun RealMod (r:real,m) =
     if r < m then r
     else RealMod(r - m, m)
 
 structure Strip = struct
-type data = {width:int ref,height:int ref,left:int ref,top:int ref,clip:string ref,zIndex:int ref}
-fun emptyData () = {width=ref ~1,height=ref ~1,left=ref ~1,top=ref ~1,clip=ref "",zIndex=ref ~1}
-fun setProp pp (prop:string) (sel:data->int ref) (strip,data:data) (n:int) : unit =
-    let val r = sel data
-    in if !r = n then ()
-       else (Js.setStyle strip (prop, pp n);
-             r := n)
-    end
-fun ppPx n = ppInt n ^ "px"
-val setWidth = setProp ppPx "width" #width
-val setHeight = setProp ppPx "height" #height
-val setTop = setProp ppPx "top" #top
-val setLeft = setProp ppPx "left" #left
-val setZindex = setProp ppInt "zIndex" #zIndex
+  type data = {width:int ref,height:int ref,left:int ref,top:int ref,clip:string ref,zIndex:int ref, src:string ref}
+  fun emptyData () = {width=ref ~1,height=ref ~1,left=ref ~1,top=ref ~1,clip=ref "",zIndex=ref ~1, src=ref "walls.png"}
+  fun setProp pp (prop:string) (sel:data->int ref) (strip,data:data) (n:int) : unit =
+      let val r = sel data
+      in if !r = n then ()
+         else (Js.setStyle strip (prop, pp n);
+               r := n)
+      end
+  fun ppPx n = ppInt n ^ "px"
+  val setWidth = setProp ppPx "width" #width
+  val setHeight = setProp ppPx "height" #height
+  val setTop = setProp ppPx "top" #top
+  val setLeft = setProp ppPx "left" #left
+  val setZindex = setProp ppInt "zIndex" #zIndex
 
-fun setClip (strip,data:data) (c:string) : unit =
-    let val r = #clip data
-    in if !r = c then ()
-       else (Js.setStyle strip ("clip", c);
-             r := c)
-    end
+  fun setClip (strip,data:data) (c:string) : unit =
+      let val r = #clip data
+      in if !r = c then ()
+         else (Js.setStyle strip ("clip", c);
+               r := c)
+      end
+
+  fun setSrc (strip,data:data) (s:string) : unit =
+      let val r = #src data
+      in if !r = s then ()
+         else (Js.setAttribute strip "src" s;
+               r := s)
+      end
 end
 
 fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAngle, stripIdx, visibleSprites) =
@@ -536,7 +544,7 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
           else
             let val wallY = Real.floor (if up then y - 1.0 else y)
 	        val wallX = Real.floor x
-                val wt = Array2.sub(Map,wallY,wallX)
+                val wt :int = Array2.sub(Map,wallY,wallX)
                     handle ? =>
                            (log ("wallX = " ^ ppInt wallX ^ "; wallY = " ^ ppInt wallY); raise ?)
             in if isWall wt then
@@ -561,7 +569,7 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
     in
       if dist <= 0.0 then visibleSprites
       else
-	let (* val () = drawRay(xHit, yHit) *)
+	let val () = drawRay(xHit, yHit)
 	    val	dist = Math.sqrt dist
 	    (* use perpendicular distance to adjust for fish eye
 	     * distorted_dist = correct_dist / cos(relative_angle_of_ray) *)
@@ -585,6 +593,12 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
             val texX = if texX > width-stripWidth then width - stripWidth else texX
 
             val stripdata = Vector.sub(screenStrips, stripIdx)
+
+            val (numTextures, wallType) =
+                if wallType = 5
+                then (Strip.setSrc stripdata "datoek-000.png"; (1,1))
+                else (Strip.setSrc stripdata "walls.png"; (numTextures,wallType))
+
             val () = Strip.setHeight stripdata height
             val () = Strip.setTop stripdata top
 
@@ -744,7 +758,7 @@ fun renderCycle screenStrips spriteMap =
     in cycle (0,[]) ()
     end
 
-fun initScreen() =
+fun initScreen () =
     let val screen = $ "screen"
         fun loop i =
             if i >= screenWidth then []
@@ -762,7 +776,7 @@ fun initScreen() =
     in loop 0
     end
 
-fun init() =
+fun init () =
    let val () = bindKeys()
        val screenStrips = Vector.fromList (initScreen())
        val spriteMap = Sprite.init (Sprite.mapItems Map)
