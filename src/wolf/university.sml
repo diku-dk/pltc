@@ -117,7 +117,7 @@ val Smap = [
     "*  H%%HOOOOOOOOOOOOOH%%H       ***********                               L                    T           T   *",
     "*       L                      *                                                                    T         *",
     "*                           P  *                   %                                                          *",
-    "********************************%%%%%%%%%%%%%M%%%%%%%%%%%%%%%HHHHHH%%%%%%%%HHHHHHHH%%%%%%HHHHHHH%%%%%%HHHHHHH**"
+    "********************************%%%%%%%%%%%%NM%%%%%%%%%%%%%%%HHHHHH%%%%%%%%HHHHHHHH%%%%%%HHHHHHH%%%%%%HHHHHHH**"
 ]
 
 local
@@ -132,6 +132,7 @@ local
       | #"%" => 3
       | #"H" => 4
       | #"M" => 5
+      | #"N" => 6
       | #"T" => 100
       | #"A" => 101
       | #"P" => 102
@@ -481,8 +482,6 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
       val angleSin = Math.sin rayAngle
       val angleCos = Math.cos rayAngle
 
-      val textureX = 0 (* the x-coord on the texture of the block, ie. what part of the texture are we going to render *)
-
       (* first check against the vertical map/wall lines
        * we do this by moving to the right or left edge of the block we're standing in
        * and then moving in 1 map unit steps horizontally. The amount we have to move vertically
@@ -511,10 +510,12 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
 		    val distY = y - !(#y player)
 	            val dist = distX*distX + distY*distY (* the distance from the player to this point, squared *)
 
+                    (* the x-coord on the texture of the block, ie. what part of the texture are we going to render *)
 		    val textureX = y - real (Real.floor y) (* where exactly are we on the wall? textureX is the x coordinate
                                                             * on the texture that we'll use later when texturing the wall. *)
                     val textureX = if not right then 1.0 - textureX else textureX (* if we're looking to the left side of the
                                                                                    * map, the texture should be reversed *)
+                    val textureX = 1.0 - textureX
                 in (* save the coordinates of the hit. We only really use these to draw the rays on minimap *)
                   ({xHit=x, yHit=y, wallType=wt, dist=dist, xWallHit=wallX, yWallHit=wallY, textureX=textureX},visibleSprites)
                 end
@@ -555,6 +556,7 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
 		   if not (dist > 0.0) orelse blockDist < dist then
                      let val textureX = x - real(Real.floor x)
                          val textureX = if up then 1.0 - textureX else textureX
+                         val textureX = 1.0-textureX
                      in ({dist=blockDist, xHit=x, yHit=y, xWallHit=wallX, yWallHit=wallY, wallType=wt, textureX=textureX},visibleSprites)
                      end
                    else ({dist=dist,xHit=xHit,yHit=yHit,xWallHit=xWallHit,yWallHit=yWallHit,wallType=wallType,textureX=textureX},visibleSprites)
@@ -594,10 +596,13 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
 
             val stripdata = Vector.sub(screenStrips, stripIdx)
 
-            val (numTextures, wallType) =
+            (* offsetX is the offset in the underlying wall image (0 or 1) *)
+            val f169 = 9.0/16.0 * 2.0
+            val (numTextures, wallType, offsetX, texX, factor) =
                 if wallType = 5
-                then (Strip.setSrc stripdata "datoek-000.png"; (1,1))
-                else (Strip.setSrc stripdata "walls.png"; (numTextures,wallType))
+                then (Strip.setSrc stripdata "datoek-000.png"; (1,1,0,texX,f169))
+                else if wallType = 6 then (Strip.setSrc stripdata "datoek-000.png"; (1,1,1,texX+width,f169))
+                else (Strip.setSrc stripdata "walls.png"; (numTextures,wallType,0,texX,1.0))
 
             val () = Strip.setHeight stripdata height
             val () = Strip.setTop stripdata top
@@ -606,7 +611,7 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
             val styleHeight = Real.floor(heightR * real numTextures)
             val () = Strip.setHeight stripdata styleHeight
 
-            val styleWidth = Real.floor(widthR * 2.0)
+            val styleWidth = Real.floor(widthR * 2.0 * factor)
             val () = Strip.setWidth stripdata styleWidth
 
             val styleTop = top - imgTop
