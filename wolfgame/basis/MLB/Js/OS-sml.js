@@ -1,0 +1,11 @@
+if ((typeof(LsiOGKjPhFZjmGbsj5e6he$3basis$0OS$1)) == "undefined") {LsiOGKjPhFZjmGbsj5e6he$3basis$0OS$1 = {};
+};
+(function(){LsiOGKjPhFZjmGbsj5e6he$3basis$0OS$1.en$SysErr$55 = new String("SysErr");
+LsiOGKjPhFZjmGbsj5e6he$3basis$0OS$1.errorMsg$56 = function(x$59){return x$59;
+};
+LsiOGKjPhFZjmGbsj5e6he$3basis$0OS$1.errorName$60 = function(x$63){return x$63;
+};
+LsiOGKjPhFZjmGbsj5e6he$3basis$0OS$1.syserror$64 = function(){return [1];
+};
+return 0;
+})();

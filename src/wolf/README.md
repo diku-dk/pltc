@@ -1,4 +1,6 @@
-# Wolfenstein-like PLTC/HCØ Experience
+---
+title: The Wolf HCØ/PLTC Experience
+---
 
 This program is a Standard ML port (and a modification) of Jacob Seidelin's
 JavaScript implementation of a Wolfenstein 3D-like game using raycasting [3,4] and

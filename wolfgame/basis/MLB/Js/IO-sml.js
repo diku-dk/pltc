@@ -1,0 +1,15 @@
+if ((typeof(YbqlfKicGrpitDo2UHppXj$3basis$0IO$1)) == "undefined") {YbqlfKicGrpitDo2UHppXj$3basis$0IO$1 = {};
+};
+(function(){YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.eq_buffer_mode$91 = function(v$95,v$96){return v$95 == v$96;
+};
+YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.en$Io$57 = new String("Io");
+YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.en$BlockingNotSupported$58 = new String("BlockingNotSupported");
+YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.exn$BlockingNotSupported$58 = [YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.en$BlockingNotSupported$58];
+YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.en$NonblockingNotSupported$59 = new String("NonblockingNotSupported");
+YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.exn$NonblockingNotSupported$59 = [YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.en$NonblockingNotSupported$59];
+YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.en$RandomAccessNotSupported$60 = new String("RandomAccessNotSupported");
+YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.exn$RandomAccessNotSupported$60 = [YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.en$RandomAccessNotSupported$60];
+YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.en$ClosedStream$61 = new String("ClosedStream");
+YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.exn$ClosedStream$61 = [YbqlfKicGrpitDo2UHppXj$3basis$0IO$1.en$ClosedStream$61];
+return 0;
+})();

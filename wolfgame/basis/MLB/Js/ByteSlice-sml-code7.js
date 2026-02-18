@@ -1,0 +1,13 @@
+if ((typeof(h8WSvsgXbw6eki1a6hrTBPn$3basis$0ByteSlice$1$7)) == "undefined") {h8WSvsgXbw6eki1a6hrTBPn$3basis$0ByteSlice$1$7 = {};
+};
+(function(){h8WSvsgXbw6eki1a6hrTBPn$3basis$0ByteSlice$1$7.maxLen$2400 = 1073741823;
+h8WSvsgXbw6eki1a6hrTBPn$3basis$0ByteSlice$1$7.array_to_table$2401 = function(x$2404){return x$2404;
+};
+h8WSvsgXbw6eki1a6hrTBPn$3basis$0ByteSlice$1$7.array_to_vector$2405 = function(a$2443){return SmlPrims.charArrayToString(a$2443);
+};
+h8WSvsgXbw6eki1a6hrTBPn$3basis$0ByteSlice$1$7.sub_unsafe$2406 = function(v$2445,v$2446){return v$2445[v$2446];
+};
+h8WSvsgXbw6eki1a6hrTBPn$3basis$0ByteSlice$1$7.length0$2413 = function(t$2416){return t$2416.length;
+};
+return 0;
+})();
