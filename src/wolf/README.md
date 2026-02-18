@@ -37,14 +37,14 @@ around and look at the different professors...
   characters/
     characters.json:["athas","mael",...]
     athas/
-	  character.json:{name:"Troels",avatar:"professor1.gif",office:"01-0-S14"}
-	  slides.json:["array-21"]
-	  array21/
-	    meta.json: {pages:"23", voice:"DK"}
-		array21.pdf
-		array21-001.png ...        // slide pages to be viewed
-		array21-023.png
-		array21-001.txt            // text to be spoken
+      character.json:{name:"Troels",avatar:"professor1.gif",office:"01-0-S14"}
+      slides.json:["array-21"]
+      array21/
+        meta.json: {pages:"23", voice:"DK"}
+        array21.pdf
+        array21-001.png ...        // slide pages to be viewed
+        array21-023.png
+        array21-001.txt            // text to be spoken
   ```
 
   Based on the json-files, we can learn about what files are available and the
