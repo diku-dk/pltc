@@ -17,6 +17,8 @@ distributed ledger technology, and Fintech).
 
 * [PLTC research groups](/pltc/groups)
 
+* [The Wolf HCØ/PLTC Experience](https://diku-dk.github.io/pltc/wolfgame/)
+
 ## Location
 
 The PLTC Section is located on the [ground floor of HCØ, in Building B](/images/office-plan.png),
