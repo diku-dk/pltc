@@ -33,22 +33,37 @@ around and look at the different professors...
 
   Slides are organised in a folder structure, as follows:
 
+  ```
   characters/
     characters.json:["athas","mael",...]
     athas/
+	  character.json:{name:"Troels",avatar:"professor1.gif",office:"01-0-S14"}
 	  slides.json:["array-21"]
 	  array21/
-	    meta.json: {"pages":"23", voice:"DK"}
+	    meta.json: {pages:"23", voice:"DK"}
 		array21.pdf
 		array21-001.png ...        // slide pages to be viewed
 		array21-023.png
 		array21-001.txt            // text to be spoken
+  ```
+
+  Based on the json-files, we can learn about what files are available and the
+  proper slides can be shown and the proper txt-file can be spoken (with the
+  proper audio).
+
+  One possibility is that the player moves around and interacts with slide shows
+  by pressing `n` (for next) and `p` (for prev) for advancing and rewinding
+  slide shows. There is a map from locations to presentation objects, where each
+  presentation has a "current page" property, which a player can adjust (using
+  `n` and `p`) when being close to the particular location. When adjusted, the
+  current speech synthesis is cancelled (`window.speechSynthesis.cancel()`) and
+  the speech synthesis for the new current page is started.
 
   Multi-page pdfs of size 16:9 may be split up into multiple pngs, using
   the following ImageMagick command:
 
   ```
-  $ convert -verbose -density 288 datoek.pdf -background white -alpha background -alpha off -resize 75% datoek-%03d.png
+  $ magick -density 288 datoek.pdf -background white -alpha background -alpha off -resize 75% datoek-%03d.png
   ```
 
 ## License
