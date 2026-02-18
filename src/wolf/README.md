@@ -51,13 +51,19 @@ around and look at the different professors...
   proper slides can be shown and the proper txt-file can be spoken (with the
   proper audio).
 
-  One possibility is that the player moves around and interacts with slide shows
-  by pressing `n` (for next) and `p` (for prev) for advancing and rewinding
-  slide shows. There is a map from locations to presentation objects, where each
-  presentation has a "current page" property, which a player can adjust (using
-  `n` and `p`) when being close to the particular location. When adjusted, the
-  current speech synthesis is cancelled (`window.speechSynthesis.cancel()`) and
-  the speech synthesis for the new current page is started.
+  The player moves around and interacts with screens, which show
+  presentations. There is a map from screens to presentation objects, where each
+  presentation has a "current page" property.
+
+  When a player is close to a screen, the player may select (by pressing `s`)
+  among slide shows associated with the character who owns the screen. There is
+  a mapping from locations to pairs of a screen and an owner.
+
+  When a player is close to a screen, the player may also advance or rewind the
+  current presentation by pressing `n` (for next) or `p` (for prev). When the
+  current page changes, the current speech synthesis is cancelled
+  (`window.speechSynthesis.cancel()`) and the speech synthesis for the new
+  current page is started.
 
   Multi-page pdfs of size 16:9 may be split up into multiple pngs, using
   the following ImageMagick command:
