@@ -26,6 +26,31 @@ To start the program in a browser, fetch `run.html`. You should now see the foll
 You navigate using keyboard arrows. There is currently no game play. Just walk
 around and look at the different professors...
 
+## Notes and Design Aspects
+
+- Support slide shows by using walls of type 5 and 6 next to each
+  other.
+
+  Slides are organised in a folder structure, as follows:
+
+  characters/
+    characters.json:["athas","mael",...]
+    athas/
+	  slides.json:["array-21"]
+	  array21/
+	    meta.json: {"pages":"23", voice:"DK"}
+		array21.pdf
+		array21-001.png ...        // slide pages to be viewed
+		array21-023.png
+		array21-001.txt            // text to be spoken
+
+  Multi-page pdfs of size 16:9 may be split up into multiple pngs, using
+  the following ImageMagick command:
+
+  ```
+  $ convert -verbose -density 288 datoek.pdf -background white -alpha background -alpha off -resize 75% datoek-%03d.png
+  ```
+
 ## License
 
 MIT-License.
