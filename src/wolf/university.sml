@@ -96,10 +96,10 @@ val Smap0 = [
 val Smap = [
     "*********************************H*H***H*H*%%%%%%%%%%%%%%%%%%HHHHHH%%%%%%%%HHHHHHHH%%%%%%HHHHHHH%%%%%%HHHHHHH**",
     "*         T   T              L *                   %                         %              %                 *",
-    "*  %%%%                        *            L   O  %    P  P                 %              %                 *",
-    "*  %  %  **O*****O***O*        *                   %                                                A  A      *",
-    "*  %  H                        *           %%%%%%%%%    P  P                                                  *",
-    "*     %             P          *                   %                                                A  A      *",
+    "*  %%%%                        **           L   O  %    P  P                 %              %                 *",
+    "*  %  %  **O*****O***O*        M*                  %                                                A  A      *",
+    "*  %  H                        N*          %%%%%%%%%    P  P                                                  *",
+    "*     %             P          **                  %                                                A  A      *",
     "*     %    *****          %**********              *    P  P                    L                             *",
     "*  %  %                        *                   *                       L         L              A  A      *",
     "*  %  H                     L     L       **       *                                                          *",
@@ -112,10 +112,10 @@ val Smap = [
     "*        %%%  %%%              *        H%H        *                                                          *",
     "*  H  HO OOOOOOOO OHH  H   P   *                   %                                                          *",
     "*  H  H             H  H       *         L         %                                                T         *",
-    "*  H  H          T  H  H       *    A        A     %HH*                                       T           T   *",
+    "*  H  H          T  H  H       *    A              %HH*                                       T           T   *",
     "*  H  H             H  H       *                   %                                                T         *",
-    "*  H%%HOOOOOOOOOOOOOH%%H       ***********                               L                    T           T   *",
-    "*       L                      *                                                                    T         *",
+    "*  H%%HOOOOOOOOOOOOOH%%H       **********                                L                    T           T   *",
+    "*       L                      *           T  A                                                     T         *",
     "*                           P  *                   %                                                          *",
     "********************************%%%%%%%%%%%%NM%%%%%%%%%%%%%%%HHHHHH%%%%%%%%HHHHHHHH%%%%%%HHHHHHH%%%%%%HHHHHHH**"
 ]
@@ -515,7 +515,6 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
                                                             * on the texture that we'll use later when texturing the wall. *)
                     val textureX = if not right then 1.0 - textureX else textureX (* if we're looking to the left side of the
                                                                                    * map, the texture should be reversed *)
-                    val textureX = 1.0 - textureX
                 in (* save the coordinates of the hit. We only really use these to draw the rays on minimap *)
                   ({xHit=x, yHit=y, wallType=wt, dist=dist, xWallHit=wallX, yWallHit=wallY, textureX=textureX},visibleSprites)
                 end
