@@ -48,29 +48,7 @@ fun log s = let val log = $"log"
                Js.appendChild log (Js.createElement "br")
             end
 
-structure MapObj = struct
-  val O = 0
-  val v = 1
-  val w = 2
-  val m = 3
-  val H = 4
-  val M = 5     (* Screen-1 *)
-  val N = 6     (* Screen-2 *)
-  val a = 7     (* Window-left *)
-  val b = 8     (* Window-center *)
-  val c = 9     (* Window-right *)
-  val w = 10    (* white wall *)
-  val j = 11    (* shelf1 *)
-  val k = 12    (* shelf2 *)
-  val h = 13    (* white board *)
-  val T = 100   (* Table - two chairs *)
-  val A = 101   (* Professor *)
-  val P = 102   (* Plant *)
-  val L = 103   (* Lamp *)
-  val D = 104   (* Desk *)
-  val C = 105   (* Coin? *)
-  fun isSprite n = n >= 100
-end
+fun isSprite n = n >= 100
 
 val Smap0 = [
     "***************************",
@@ -130,27 +108,27 @@ val Smap = [
 ]
 
 val Smap = [
-   "*abc*abc*abc*abc*abc*abc*abc*abc*abc*abc*abcabcabcabc*",
-   "*   *   *  D*D  *  D*  D*   *T P*   * T *  L      L  *",
-   "*   *   O   H   *   H   *   *   *   * T NL  TTTTTT   *",
-   "* L * L * L * L * L H L * L * L * L * L ML  TTTTTT   *",
-   "*   *T  H   *   *   *   *   *   *   *   *  L      L  *",
-   "* L * L * L * L * L * L * L * L * L * LT*            *",
-   "*   ** **   ** *** **   *   ** *** **  T**** *      T*",
-   "*       *               *               *    *********",
-   "******* ******     ***********     *******   * P******",
-   "*TTTTT* ******T L  *TT *     *T L  *******P L  T******",
-   "*       ******T    *  P*     *T    *******T  * T******",
-   "******* ******     ** **** ***     *******   *********",
-   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L  L O",
-   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L  L O",
-   "******* **** **** *** *** *** *** *** *** *** ********",
-   "******* C*   *     H L * L * L * L * L * L * L *******",
-   "******* C* * * TTA H  T*   *   *  T*   *  T*   *******",
-   "*       C*** * TTA H   *   *   *   *   *   *   *******",
-   "* ** ** **T  * TTA K  T*   *T T*H T*   *   *   *******",
-   "* T* T* T*   *PTTAPH  A* AT*   *H A* TA*   *   *******",
-   "**********cba*cbaca*cba*cba*cba*cba*cba*cba*cba*******"
+   "*abc*abc*abc*abc*abc*abc*abc*abc*abc*abc*abcabcabc*",
+   "*D DKD  *  D*D  *  D*  D*   *T P*   * T *  L   L  *",
+   "*   K   O   H   *   H   *   *   *   * T NL  TTT   O",
+   "*DL H L * L * L * L H L * L * L * L * L ML  TTT  A*",
+   "*   *T  H   *   *   *   *   *   *   *   *A L   L  *",
+   "* L * L * L * L * L * L * L * L * L * LT*         *",
+   "*D  ** **   ** *** **   *   ** *** **  T**I* *  AT*",
+   "*       *               *               *    ******",
+   "******* ******     ***********     *******   * P***",
+   "*TTTTT* ******T L  *TT *     *T L  *******P L  T***",
+   "*       I*****T    *  P*     *T    *******T  * T***",
+   "******* ******     ** **** ***     ***O***   ******",
+   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L O",
+   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L I",
+   "****I** **** **** *I* *** *** *I* *** *** *** *****",
+   "******* C*   *     H L * L * L * L * L * L * L ****",
+   "******* C* * * TTA H  T*   *   *  T*   *  T*   ****",
+   "*       C*** * TT  H   *   *   K   *   *   *   ****",
+   "* ** ** **T  * TTA K  T*   *T TH  T*   *   *   ****",
+   "* T* T* T*   *PTTAPH  A* AT*   H  A* TA*   *   ****",
+   "**********cba*cbaca*cba*cba*cba*cba*cba*cba*cba****"
 ]
 
 local
@@ -171,6 +149,7 @@ local
       | #"H" => 11   (* shelf1 *)
       | #"K" => 12   (* shelf2 *)
       | #"O" => 13   (* white board *)
+      | #"I" => 14   (* bulletin board *)
       | #"T" => 100
       | #"A" => 101
       | #"P" => 102
@@ -187,16 +166,14 @@ structure Sprite = struct
 datatype kind = Table | Professor | Plant | Lamp | Coin | Desk
 
 fun toKind i =
-    let open MapObj
-    in if not (isSprite i) then NONE
-       else if i = T then SOME Table
-       else if i = A then SOME Professor
-       else if i = P then SOME Plant
-       else if i = L then SOME Lamp
-       else if i = C then SOME Coin
-       else if i = D then SOME Desk
-       else NONE
-    end
+    if not (isSprite i) then NONE
+    else if i = 100 then SOME Table
+    else if i = 101 then SOME Professor
+    else if i = 102 then SOME Plant
+    else if i = 103 then SOME Lamp
+    else if i = 104 then SOME Desk
+    else if i = 105 then SOME Coin
+    else NONE
 
 fun blocking k =
     case k of
@@ -314,7 +291,7 @@ infix +=
 fun a += (n:real) = a := !a + n
 
 fun isWall k =
-    k > 0 andalso not(MapObj.isSprite k)
+    k > 0 andalso not(isSprite k)
 
 fun isBlocking spriteMap (x,y) =
     (y < 0.0 orelse y >= mapHeightR orelse x < 0.0 orelse x >= mapWidthR) orelse
@@ -655,6 +632,8 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
                     (Strip.setSrc stripdata "wall-shelf2.png"; (1,1,texX,1.0))
                   | 13 => (* White board *)
                     (Strip.setSrc stripdata "wall-board.png"; (1,1,texX,1.0))
+                  | 14 => (* White board *)
+                    (Strip.setSrc stripdata "wall-bulletin.png"; (1,1,texX,1.0))
                   | _ => (* Other *)
                     (Strip.setSrc stripdata "walls.png"; (numTextures,wallType,texX,2.0))
 
