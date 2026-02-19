@@ -48,8 +48,6 @@ fun log s = let val log = $"log"
                Js.appendChild log (Js.createElement "br")
             end
 
-fun isSprite n = n >= 100
-
 val Smap0 = [
     "***************************",
     "*   %          %   %   O  %",
@@ -95,7 +93,7 @@ val Smap = [
     "*                              *                   *                       L         L                        *",
     "*        %%%  %%%              O    L  L  L  L  L  *%%%%                        L                             *",
     "*        %%%  %%%              *                   *                                                       %%%*",
-    "*    L   %%%  %%%         m***** P                 *                                                          *",
+    "*    L   %%%  %%%         %***** P                 *                                                          *",
     "*        %%%  %%%              *        H%H        *                                                          *",
     "*  H  HO OOOOOOOO OHH  H   P   *                   %                                                          *",
     "*  H  H             H  H       *         L         %                                                T         *",
@@ -109,14 +107,14 @@ val Smap = [
 
 val Smap = [
    "*abc*abc*abc*abc*abc*abc*abc*abc*abc*abc*abcabcabc*",
-   "*D DKD  *  D*D  *  D*  D*   *T P*   * T *  L   L  *",
+   "*D DKD  *  D*D  *D  K  D*   *T P*   * T *  L   L  *",
    "*   K   O   H   *   H   *   *   *   * T NL  TTT   O",
-   "*DL H L * L * L * L H L * L * L * L * L ML  TTT  A*",
-   "*   *T  H   *   *   *   *   *   *   *   *A L   L  *",
-   "* L * L * L * L * L * L * L * L * L * LT*         *",
-   "*D  ** **   ** *** **   *   ** *** **  T**I* *  AT*",
+   "*DL H L * L * L N L H L * L * L * L * L ML  TTT  A*",
+   "*   *T  I   *   M   O   *   *   *   *   *A L   L  *",
+   "* L * L * L * L *PLT* L * L * L * L * LT*         *",
+   "*D  ** *H   ** *** **   *   ** *** **  T**I* *  AT*",
    "*       *               *               *    ******",
-   "******* ******     ***********     *******   * P***",
+   "******* *KKK**     ***********     *******   * P***",
    "*TTTTT* ******T L  *TT *     *T L  *******P L  T***",
    "*       I*****T    *  P*     *T    *******T  * T***",
    "******* ******     ** **** ***     ***O***   ******",
@@ -131,65 +129,71 @@ val Smap = [
    "**********cba*cbaca*cba*cba*cba*cba*cba*cba*cba****"
 ]
 
+datatype sprite = Table | Armor | Plant | Lamp | Desk | Coin
+
+datatype obj = Wall | Bulletin | Whiteboard
+             | ShelfLow | ShelfHigh
+             | WindowLeft | WindowCenter | WindowRight
+             | ScreenLeft | ScreenRight
+             | Sprite of sprite
+             | Space
+             | Wall1 | Wall2 | Wall3
+
+fun isSprite (Sprite _) = true
+  | isSprite _ = false
+
 local
-  fun chToWallType c =
+
+  fun chToObj c =
       case c of
-        #" " => 0
-      | #"w" => 1
-      | #"=" => 2
-      | #"m" => 3
-      | #"%" => 3
-      | #"h" => 4
-      | #"M" => 5
-      | #"N" => 6
-      | #"a" => 7
-      | #"b" => 8
-      | #"c" => 9
-      | #"*" => 10   (* white wall *)
-      | #"H" => 11   (* shelf1 *)
-      | #"K" => 12   (* shelf2 *)
-      | #"O" => 13   (* white board *)
-      | #"I" => 14   (* bulletin board *)
-      | #"T" => 100
-      | #"A" => 101
-      | #"P" => 102
-      | #"L" => 103
-      | #"D" => 104
-      | #"C" => 105
+        #" " => Space
+      | #"w" => Wall1
+      | #"=" => Wall2
+      | #"%" => Wall3
+      | #"M" => ScreenLeft
+      | #"N" => ScreenRight
+      | #"a" => WindowLeft
+      | #"b" => WindowCenter
+      | #"c" => WindowRight
+      | #"*" => Wall
+      | #"H" => ShelfLow
+      | #"K" => ShelfHigh
+      | #"O" => Whiteboard
+      | #"I" => Bulletin
+      | #"T" => Sprite Table
+      | #"A" => Sprite Armor
+      | #"P" => Sprite Plant
+      | #"L" => Sprite Lamp
+      | #"D" => Sprite Desk
+      | #"C" => Sprite Coin
       | _ => raise Fail ("unknown character '" ^ Char.toString c ^ "'")
-  fun line (s:string) : int list = CharVector.foldr (fn (c,a) => chToWallType c :: a) [] s
-in val Map : int Array2.array = Array2.fromList (List.map line Smap)
+
+  fun line (s:string) : obj list = CharVector.foldr (fn (c,a) => chToObj c :: a) [] s
+in val Map : obj Array2.array = Array2.fromList (List.map line Smap)
 end
 
 structure Sprite = struct
 
-datatype kind = Table | Professor | Plant | Lamp | Coin | Desk
-
-fun toKind i =
-    if not (isSprite i) then NONE
-    else if i = 100 then SOME Table
-    else if i = 101 then SOME Professor
-    else if i = 102 then SOME Plant
-    else if i = 103 then SOME Lamp
-    else if i = 104 then SOME Desk
-    else if i = 105 then SOME Coin
-    else NONE
+fun toSprite (obj) : sprite option =
+    case obj of
+        Sprite spr => SOME spr
+      | _ => NONE
 
 fun blocking k =
     case k of
-      Table => true
-    | Professor => true
-    | Plant => true
-    | Lamp => false
-    | Coin => false
-    | Desk => true
+        Table => true
+      | Armor => true
+      | Plant => true
+      | Lamp => false
+      | Coin => false
+      | Desk => true
 
 fun img k (p:int*int) =
     case k of
         Table => "tablechairs.png"
-      | Professor => let val i = ((#1 p + #2 p) mod 4 + 1)
-                     in "professor" ^ Int.toString i ^ ".gif"
-                     end
+      | Armor => let val i = ((#1 p + #2 p) mod 4 + 1)
+                 in "professor" ^ Int.toString i ^ ".gif"
+                 end
       | Plant => "plantgreen.png"
       | Lamp => "lamp.png"
       | Coin => "score.png"
@@ -215,24 +219,25 @@ fun init items =
                                end) items;
        spriteMap
     end
+
 fun region a = {base=a,row=0,col=0,nrows=NONE,ncols=NONE}
 
 fun mapItems Map =
-    Array2.foldi Array2.RowMajor (fn (y,x,i,acc) =>
-                                     case toKind i of
-                                       SOME k => (k,x,y)::acc
-                                     | NONE => acc) [] (region Map)
+    Array2.foldi Array2.RowMajor (fn (y,x,obj,acc) =>
+                                     case toSprite obj of
+                                         SOME spr => (spr,x,y)::acc
+                                       | NONE => acc) [] (region Map)
 end
 
 val MaxRotSpeed = 3.0 * Math.pi / 360.0 (* how much does the player rotate each step/update (in radians) *)
 
 val player = {
-   x = ref 16.0,                    (* current x, y position *)
+   x = ref 16.0,        (* current x, y position *)
    y = ref 10.0,
-   rot = ref 0.0,                   (* the current angle of rotation *)
-   speed = ref 0.0,                 (* the playing moving forward (speed = 1) or backwards (speed = -1) *)
-   rotSpeed = ref 0.0,              (* the direction that the player is turning, between -1.0 for left and 1.0 for right *)
-   moveSpeed = 0.10,                (* how far (in map units) does the player move each step/update *)
+   rot = ref 0.0,       (* the current angle of rotation *)
+   speed = ref 0.0,     (* the playing moving forward (speed = 1) or backwards (speed = -1) *)
+   rotSpeed = ref 0.0,  (* the direction that the player is turning, between -1.0 for left and 1.0 for right *)
+   moveSpeed = 0.10,    (* how far (in map units) does the player move each step/update *)
    rotAcc = ref 0.0
 }
 
@@ -251,7 +256,6 @@ val numRays        = Real.ceil(screenWidthR / stripWidthR)
 val fovHalf        = fov / 2.0
 val viewDist       = screenWidthR / 2.0 / Math.tan(fovHalf)
 val twoPI          = Math.pi * 2.0
-val numTextures    = 4
 
 fun installDocHandler s (f:int->unit) : unit =
     JsCore.exec1 {stmt="document." ^ s ^ " = function(e) { e = e || window.event; f(e.keyCode); };",
@@ -268,11 +272,13 @@ fun bindKeys () =
                      (fn 38 => #speed player := 1.0   (* up, move player forward, ie. increase speed *)
 	               | 40 => #speed player := ~1.0  (* down, move player backward, set negative speed *)
 	               | 37 => let val rotAcc = #rotAcc player
-                               in if !rotAcc > ~0.5 then rotAcc := !rotAcc - rotAccDelta  (* left, rotate player left *)
+                               in if !rotAcc > ~0.5
+                                  then rotAcc := !rotAcc - rotAccDelta  (* left, rotate player left *)
                                   else ()
                                end
 	               | 39 => let val rotAcc = #rotAcc player
-                               in if !rotAcc < 0.5 then rotAcc := !rotAcc + rotAccDelta  (* right, rotate player right *)
+                               in if !rotAcc < 0.5
+                                  then rotAcc := !rotAcc + rotAccDelta  (* right, rotate player right *)
                                   else ()
                                end
                        | _ => ()
@@ -290,8 +296,9 @@ fun bindKeys () =
 infix +=
 fun a += (n:real) = a := !a + n
 
-fun isWall k =
-    k > 0 andalso not(isSprite k)
+fun isWall Space = false
+  | isWall (Sprite _) = false
+  | isWall _ = true
 
 fun isBlocking spriteMap (x,y) =
     (y < 0.0 orelse y >= mapHeightR orelse x < 0.0 orelse x >= mapWidthR) orelse
@@ -513,7 +520,7 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
 
       fun loop (x, y) visibleSprites =
           if x < 0.0 orelse x >= mapWidthR orelse y < 0.0 orelse y >= mapHeightR then
-            ({xHit = 0.0, yHit = 0.0, dist = 0.0, textureX = 0.0, xWallHit = 0, yWallHit = 0, wallType = 0},visibleSprites)
+            ({xHit = 0.0, yHit = 0.0, dist = 0.0, textureX = 0.0, xWallHit = 0, yWallHit = 0, wallType = Space},visibleSprites)
           else
             let
 	      val wallX = Real.floor (if right then x else x - 1.0)
@@ -559,7 +566,7 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
           else
             let val wallY = Real.floor (if up then y - 1.0 else y)
 	        val wallX = Real.floor x
-                val wt :int = Array2.sub(Map,wallY,wallX)
+                val wt : obj = Array2.sub(Map,wallY,wallX)
                     handle ? =>
                            (log ("wallX = " ^ ppInt wallX ^ "; wallY = " ^ ppInt wallY); raise ?)
             in if isWall wt then
@@ -610,37 +617,27 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
 
             val stripdata = Vector.sub(screenStrips, stripIdx)
 
-            (* offsetX is the offset in the underlying wall image (0 or 1) *)
-            val f169 = (*16.0/9.0*) 2.0
-            val (numTextures, wallType, texX, factor) =
+            val (numTextures, textureOffset, texX, factor) =
                 case wallType of
-                    5 => (* Screen-1 *)
-                    (Strip.setSrc stripdata "datoek-000.png"; (1,1,texX,f169))
-                  | 6 => (* Screen-2 *)
-                    (Strip.setSrc stripdata "datoek-000.png"; (1,1,texX+width,f169))
-                  | 7 => (* Window-left *)
-                    (Strip.setSrc stripdata "window-left.png"; (1,1,texX,1.0))
-                  | 8 => (* Window-center *)
-                    (Strip.setSrc stripdata "window-center.png"; (1,1,texX,1.0))
-                  | 9 => (* Window-right *)
-                    (Strip.setSrc stripdata "window-right.png"; (1,1,texX,1.0))
-                  | 10 => (* White wall *)
-                    (Strip.setSrc stripdata "wall-white.png"; (1,1,texX,1.0))
-                  | 11 => (* Shelf1 *)
-                    (Strip.setSrc stripdata "wall-shelf1.png"; (1,1,texX,1.0))
-                  | 12 => (* Shelf2 *)
-                    (Strip.setSrc stripdata "wall-shelf2.png"; (1,1,texX,1.0))
-                  | 13 => (* White board *)
-                    (Strip.setSrc stripdata "wall-board.png"; (1,1,texX,1.0))
-                  | 14 => (* White board *)
-                    (Strip.setSrc stripdata "wall-bulletin.png"; (1,1,texX,1.0))
-                  | _ => (* Other *)
-                    (Strip.setSrc stripdata "walls.png"; (numTextures,wallType,texX,2.0))
+                    ScreenLeft => (Strip.setSrc stripdata "datoek-000.png"; (1,0,texX,2.0))
+                  | ScreenRight => (Strip.setSrc stripdata "datoek-000.png"; (1,0,texX+width,2.0))
+                  | WindowLeft => (Strip.setSrc stripdata "window-left.png"; (1,0,texX,1.0))
+                  | WindowCenter => (Strip.setSrc stripdata "window-center.png"; (1,0,texX,1.0))
+                  | WindowRight => (Strip.setSrc stripdata "window-right.png"; (1,0,texX,1.0))
+                  | Wall => (Strip.setSrc stripdata "wall-white.png"; (1,0,texX,1.0))
+                  | ShelfLow => (Strip.setSrc stripdata "wall-shelf1.png"; (1,0,texX,1.0))
+                  | ShelfHigh => (Strip.setSrc stripdata "wall-shelf2.png"; (1,0,texX,1.0))
+                  | Whiteboard => (Strip.setSrc stripdata "wall-board.png"; (1,0,texX,1.0))
+                  | Bulletin => (Strip.setSrc stripdata "wall-bulletin.png"; (1,0,texX,1.0))
+                  | Wall1 => (Strip.setSrc stripdata "walls.png"; (4,0,texX,2.0))
+                  | Wall2 => (Strip.setSrc stripdata "walls.png"; (4,1,texX,2.0))
+                  | Wall3 => (Strip.setSrc stripdata "walls.png"; (4,2,texX,2.0))
+                  | _ => raise Fail "obj not supported"
 
             val () = Strip.setHeight stripdata height
             val () = Strip.setTop stripdata top
 
-            val imgTop = Real.floor(heightR * real (wallType-1))
+            val imgTop = Real.floor(heightR * real textureOffset)
             val styleHeight = Real.floor(heightR * real numTextures)
             val () = Strip.setHeight stripdata styleHeight
 
