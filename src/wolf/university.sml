@@ -121,15 +121,15 @@ val Smap = [
    "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L O",
    "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L I",
    "****I** **** **** *I* *** *** *I* *** *** *** *****",
-   "******* C*   *     H L * L * L * L * L * L * L ****",
-   "******* C* * * TTA H  T*   *   *  T*   *  T*   ****",
-   "*       C*** * TT  H   *   *   K   *   *   *   ****",
-   "* ** ** **T  * TTA K  T*   *T TH  T*   *   *   ****",
-   "* T* T* T*   *PTTAPH  A* AT*   H  A* TA*   *   ****",
+   "******* S*   *     H L * L * L * L * L * L * L ****",
+   "******* S* * * TTA H  T*   *   *  T*   *  T*   ****",
+   "*       S*** * TT  H   *   *   K   *   *   *   ****",
+   "* ** ** **U  * TTA K  T*   *T TH  T*   *   *   ****",
+   "*SU*SU*SU*S T*PTTAPH  A* AT*   H  A* TA*   *   ****",
    "**********cba*cbaca*cba*cba*cba*cba*cba*cba*cba****"
 ]
 
-datatype sprite = Table | Armor | Plant | Lamp | Desk | Coin
+datatype sprite = Table | Armor | Plant | Lamp | Desk | Sink | Toilet
 
 datatype obj = Wall | Bulletin | Whiteboard
              | ShelfLow | ShelfHigh
@@ -165,7 +165,8 @@ local
       | #"P" => Sprite Plant
       | #"L" => Sprite Lamp
       | #"D" => Sprite Desk
-      | #"C" => Sprite Coin
+      | #"S" => Sprite Sink
+      | #"U" => Sprite Toilet
       | _ => raise Fail ("unknown character '" ^ Char.toString c ^ "'")
 
   fun line (s:string) : obj list = CharVector.foldr (fn (c,a) => chToObj c :: a) [] s
@@ -185,8 +186,9 @@ fun blocking k =
       | Armor => true
       | Plant => true
       | Lamp => false
-      | Coin => false
+      | Sink => false
       | Desk => true
+      | Toilet => true
 
 fun img k (p:int*int) =
     case k of
@@ -196,8 +198,9 @@ fun img k (p:int*int) =
                  end
       | Plant => "plantgreen.png"
       | Lamp => "lamp.png"
-      | Coin => "score.png"
+      | Sink => "sink.png"
       | Desk => "desk.png"
+      | Toilet => "toilet.png"
 
 type t = {img: Js.elem, visible: bool ref, block: bool, pos: int * int, enabled: bool ref}
 
