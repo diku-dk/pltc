@@ -68,10 +68,15 @@ around and look at the different professors...
   current page is started.
 
   Multi-page pdfs of size 16:9 may be split up into multiple pngs, using
-  the following ImageMagick command:
+  the following ImageMagick command - extended to fit in two squares:
 
   ```
-  $ magick -density 288 datoek.pdf -background white -alpha background -alpha off -resize 75% datoek-%03d.png
+  $ magick -density 288 datoek.pdf -background white -alpha background -alpha off -resize 75% -gravity center -extent 1634x817 datoek-%03d.png
+  ```
+
+  Use `gifsicle` to resize (extend) an animated gif:
+  ```
+  $ gifsicle --resize 512x512 -i professor1.gif > professor5.gif
   ```
 
 ## License

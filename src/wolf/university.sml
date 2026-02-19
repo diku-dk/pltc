@@ -1,8 +1,8 @@
 
 local
 
-val screenWidth    = 1000
-val screenHeight   = 500
+val screenWidth    = 1600 div 2
+val screenHeight   = 900 div 2
 
 fun ppInt i = if i < 0 then "-" ^ Int.toString (~i) else Int.toString i
 
@@ -50,16 +50,25 @@ fun log s = let val log = $"log"
 
 structure MapObj = struct
   val O = 0
-  val W = 1
+  val v = 1
   val w = 2
   val m = 3
   val H = 4
-  val T = 100
-  val A = 101
-  val P = 102
-  val L = 103
-  val B = 104
-  val C = 105
+  val M = 5     (* Screen-1 *)
+  val N = 6     (* Screen-2 *)
+  val a = 7     (* Window-left *)
+  val b = 8     (* Window-center *)
+  val c = 9     (* Window-right *)
+  val w = 10    (* white wall *)
+  val j = 11    (* shelf1 *)
+  val k = 12    (* shelf2 *)
+  val h = 13    (* white board *)
+  val T = 100   (* Table - two chairs *)
+  val A = 101   (* Professor *)
+  val P = 102   (* Plant *)
+  val L = 103   (* Lamp *)
+  val D = 104   (* Desk *)
+  val C = 105   (* Coin? *)
   fun isSprite n = n >= 100
 end
 
@@ -120,24 +129,53 @@ val Smap = [
     "********************************%%%%%%%%%%%%NM%%%%%%%%%%%%%%%HHHHHH%%%%%%%%HHHHHHHH%%%%%%HHHHHHH%%%%%%HHHHHHH**"
 ]
 
+val Smap = [
+   "*abc*abc*abc*abc*abc*abc*abc*abc*abc*abc*abcabcabcabc*",
+   "*   *   *  D*D  *  D*  D*   *T P*   * T *  L      L  *",
+   "*   *   O   H   *   H   *   *   *   * T NL  TTTTTT   *",
+   "* L * L * L * L * L H L * L * L * L * L ML  TTTTTT   *",
+   "*   *T  H   *   *   *   *   *   *   *   *  L      L  *",
+   "* L * L * L * L * L * L * L * L * L * LT*            *",
+   "*   ** **   ** *** **   *   ** *** **  T**** *      T*",
+   "*       *               *               *    *********",
+   "******* ******     ***********     *******   * P******",
+   "*TTTTT* ******T L  *TT *     *T L  *******P L  T******",
+   "*       ******T    *  P*     *T    *******T  * T******",
+   "******* ******     ** **** ***     *******   *********",
+   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L  L O",
+   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L  L O",
+   "******* **** **** *** *** *** *** *** *** *** ********",
+   "******* C*   *     H L * L * L * L * L * L * L *******",
+   "******* C* * * TTA H  T*   *   *  T*   *  T*   *******",
+   "*       C*** * TTA H   *   *   *   *   *   *   *******",
+   "* ** ** **T  * TTA K  T*   *T T*H T*   *   *   *******",
+   "* T* T* T*   *PTTAPH  A* AT*   *H A* TA*   *   *******",
+   "**********cba*cbaca*cba*cba*cba*cba*cba*cba*cba*******"
+]
+
 local
   fun chToWallType c =
       case c of
         #" " => 0
-      | #"*" => 1
+      | #"w" => 1
       | #"=" => 2
-      | #"w" => 2
-      | #"O" => 2
       | #"m" => 3
       | #"%" => 3
-      | #"H" => 4
+      | #"h" => 4
       | #"M" => 5
       | #"N" => 6
+      | #"a" => 7
+      | #"b" => 8
+      | #"c" => 9
+      | #"*" => 10   (* white wall *)
+      | #"H" => 11   (* shelf1 *)
+      | #"K" => 12   (* shelf2 *)
+      | #"O" => 13   (* white board *)
       | #"T" => 100
       | #"A" => 101
       | #"P" => 102
       | #"L" => 103
-      | #"B" => 104
+      | #"D" => 104
       | #"C" => 105
       | _ => raise Fail ("unknown character '" ^ Char.toString c ^ "'")
   fun line (s:string) : int list = CharVector.foldr (fn (c,a) => chToWallType c :: a) [] s
@@ -146,7 +184,7 @@ end
 
 structure Sprite = struct
 
-datatype kind = Table | Professor | Plant | Lamp | Coin | Bread
+datatype kind = Table | Professor | Plant | Lamp | Coin | Desk
 
 fun toKind i =
     let open MapObj
@@ -156,7 +194,7 @@ fun toKind i =
        else if i = P then SOME Plant
        else if i = L then SOME Lamp
        else if i = C then SOME Coin
-       else if i = B then SOME Bread
+       else if i = D then SOME Desk
        else NONE
     end
 
@@ -167,7 +205,7 @@ fun blocking k =
     | Plant => true
     | Lamp => false
     | Coin => false
-    | Bread => false
+    | Desk => true
 
 fun img k (p:int*int) =
     case k of
@@ -178,7 +216,7 @@ fun img k (p:int*int) =
       | Plant => "plantgreen.png"
       | Lamp => "lamp.png"
       | Coin => "score.png"
-      | Bread => "time.png"
+      | Desk => "desk.png"
 
 type t = {img: Js.elem, visible: bool ref, block: bool, pos: int * int, enabled: bool ref}
 
@@ -539,7 +577,7 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
       val x = !(#x player) + (y - !(#y player)) * slope
 
       fun loop (x,y) visibleSprites =
-	  if (x < 0.0 orelse x >= mapWidthR orelse y < 0.0 orelse y >= mapHeightR orelse slope > 10000.0) then
+	  if x < 0.0 orelse x >= mapWidthR orelse y < 0.0 orelse y >= mapHeightR orelse slope > 10000.0 orelse (up andalso y-1.0 < 0.0) then
             ({dist=dist,xHit=xHit,yHit=yHit,xWallHit=xWallHit,yWallHit=yWallHit,wallType=wallType,textureX=textureX},visibleSprites)
           else
             let val wallY = Real.floor (if up then y - 1.0 else y)
@@ -596,12 +634,29 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
             val stripdata = Vector.sub(screenStrips, stripIdx)
 
             (* offsetX is the offset in the underlying wall image (0 or 1) *)
-            val f169 = 9.0/16.0 * 2.0
-            val (numTextures, wallType, offsetX, texX, factor) =
-                if wallType = 5
-                then (Strip.setSrc stripdata "datoek-000.png"; (1,1,0,texX,f169))
-                else if wallType = 6 then (Strip.setSrc stripdata "datoek-000.png"; (1,1,1,texX+width,f169))
-                else (Strip.setSrc stripdata "walls.png"; (numTextures,wallType,0,texX,1.0))
+            val f169 = (*16.0/9.0*) 2.0
+            val (numTextures, wallType, texX, factor) =
+                case wallType of
+                    5 => (* Screen-1 *)
+                    (Strip.setSrc stripdata "datoek-000.png"; (1,1,texX,f169))
+                  | 6 => (* Screen-2 *)
+                    (Strip.setSrc stripdata "datoek-000.png"; (1,1,texX+width,f169))
+                  | 7 => (* Window-left *)
+                    (Strip.setSrc stripdata "window-left.png"; (1,1,texX,1.0))
+                  | 8 => (* Window-center *)
+                    (Strip.setSrc stripdata "window-center.png"; (1,1,texX,1.0))
+                  | 9 => (* Window-right *)
+                    (Strip.setSrc stripdata "window-right.png"; (1,1,texX,1.0))
+                  | 10 => (* White wall *)
+                    (Strip.setSrc stripdata "wall-white.png"; (1,1,texX,1.0))
+                  | 11 => (* Shelf1 *)
+                    (Strip.setSrc stripdata "wall-shelf1.png"; (1,1,texX,1.0))
+                  | 12 => (* Shelf2 *)
+                    (Strip.setSrc stripdata "wall-shelf2.png"; (1,1,texX,1.0))
+                  | 13 => (* White board *)
+                    (Strip.setSrc stripdata "wall-board.png"; (1,1,texX,1.0))
+                  | _ => (* Other *)
+                    (Strip.setSrc stripdata "walls.png"; (numTextures,wallType,texX,2.0))
 
             val () = Strip.setHeight stripdata height
             val () = Strip.setTop stripdata top
@@ -610,7 +665,7 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
             val styleHeight = Real.floor(heightR * real numTextures)
             val () = Strip.setHeight stripdata styleHeight
 
-            val styleWidth = Real.floor(widthR * 2.0 * factor)
+            val styleWidth = Real.floor(widthR * factor)
             val () = Strip.setWidth stripdata styleWidth
 
             val styleTop = top - imgTop
