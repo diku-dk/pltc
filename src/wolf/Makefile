@@ -13,7 +13,7 @@ all:
 
 .PHONY: clean
 clean:
-	rm -rf *~ MLB run.html *.ico
+	rm -rf *~ MLB run.html *.ico deploy
 
 deploy: Makefile favicon.ico
 	rm -rf deploy
@@ -28,3 +28,8 @@ favicon.ico: smltojs_logo_no_text.png
             \( -clone 0 -resize 16x16 \) \( -clone 0 -resize 32x32 \) \
             \( -clone 0 -resize 48x48 \) \( -clone 0 -resize 64x64 \) \
             favicon.ico
+
+.PHONY: dodeploy
+dodeploy: deploy
+	rm -rf ../../wolfgame
+	cp -pa deploy ../../wolfgame

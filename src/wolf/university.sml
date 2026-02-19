@@ -14,6 +14,7 @@ fun $ id =
 fun println s = print (s ^ "\n")
 val _ = println "<html><head>"
 val _ = println "<title>Canvas example</title>"
+val _ = println "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />"
 val _ = println "<style>"
 val _ = println "div#minimapcontainer { position : absolute; width : 100%; }"
 val _ = println ("canvas#minimap { position : absolute; width : " ^ ppInt screenWidth ^ "px; }")
