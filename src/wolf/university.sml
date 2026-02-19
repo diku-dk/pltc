@@ -114,13 +114,13 @@ val Smap = [
    "* L * L * L * L *PLT* L * L * L * L * LT*         *",
    "*D  ** *H   ** *** **   *   ** *** **  T**I* *  AT*",
    "*       *               *               *    ******",
-   "******* *KKK**     ***********     *******   * P***",
-   "*TTTTT* ******T L  *TT *     *T L  *******P L  T***",
-   "*       I*****T    *  P*     *T    *******T  * T***",
-   "******* ******     ** **** ***     ***O***   ******",
-   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L O",
-   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  L I",
-   "****I** **** **** *I* *** *** *I* *** *** *** *****",
+   "******* *KKK**    A***********     *******   * P***",
+   "*TTTTT* ******T L  NTT *     *T L  *******P L  T***",
+   "*       I*****T    M  P*     *T    *******T  * T***",
+   "******* **MN**    P** **** ***     *O*MN**   ******",
+   "*  L  L   L L  L  L  L  L  L  L  L  L  LA L  L  L O",
+   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  LAI",
+   "****I** **** **** *I* *** *** *I* *** *** *** *MN**",
    "******* S*   *     H L * L * L * L * L * L * L ****",
    "******* S* * * TTA H  T*   *   *  T*   *  T*   ****",
    "*       S*** * TT  H   *   *   K   *   *   *   ****",
@@ -521,9 +521,11 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
       val x = real x
       val y = !(#y player) + (x - (!(#x player))) * slope (* starting vertical position. We add the small horizontal step we just made, multiplied by the slope. *)
 
-      fun loop (x, y) visibleSprites =
+      val emptyHit = {xHit = 0.0, yHit = 0.0, dist = 0.0, textureX = 0.0, xWallHit = 0, yWallHit = 0, wallType = Space, swapScreen = false}
+
+      fun loopV (x, y) visibleSprites =
           if x < 0.0 orelse x >= mapWidthR orelse y < 0.0 orelse y >= mapHeightR then
-            ({xHit = 0.0, yHit = 0.0, dist = 0.0, textureX = 0.0, xWallHit = 0, yWallHit = 0, wallType = Space},visibleSprites)
+            (emptyHit,visibleSprites)
           else
             let
 	      val wallX = Real.floor (if right then x else x - 1.0)
@@ -540,17 +542,19 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
                                                             * on the texture that we'll use later when texturing the wall. *)
                     val textureX = if not right then 1.0 - textureX else textureX (* if we're looking to the left side of the
                                                                                    * map, the texture should be reversed *)
+                    val swapScreen = rayAngle < Math.pi/2.0 orelse rayAngle > 3.0*Math.pi/2.0
                 in (* save the coordinates of the hit. We only really use these to draw the rays on minimap *)
-                  ({xHit=x, yHit=y, wallType=wt, dist=dist, xWallHit=wallX, yWallHit=wallY, textureX=textureX},visibleSprites)
+                  ({xHit=x, yHit=y, wallType=wt, dist=dist, xWallHit=wallX,
+                    yWallHit=wallY, textureX=textureX, swapScreen=swapScreen},visibleSprites)
                 end
               else
-                loop (x+dXVer,y+dYVer)
-                     (case Array2.sub(spriteMap,wallY,wallX) of
-                        NONE => visibleSprites
-                      | SOME sprite => if !(#visible sprite) then visibleSprites
-                                       else (#visible sprite := true; sprite::visibleSprites))
+                loopV (x+dXVer,y+dYVer)
+                      (case Array2.sub(spriteMap,wallY,wallX) of
+                           NONE => visibleSprites
+                         | SOME sprite => if !(#visible sprite) then visibleSprites
+                                          else (#visible sprite := true; sprite::visibleSprites))
             end
-      val ({xHit, yHit, dist, textureX, xWallHit, yWallHit, wallType},visibleSprites) = loop (x,y) visibleSprites
+      val (hit,visibleSprites) = loopV (x,y) visibleSprites
 
       (* now check against horizontal lines. It's basically the same, just "turned around".
        * the only difference here is that once we hit a map block,
@@ -563,39 +567,41 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
       val y = real(if up then Real.floor(!(#y player)) else Real.ceil(!(#y player)))
       val x = !(#x player) + (y - !(#y player)) * slope
 
-      fun loop (x,y) visibleSprites =
+      fun loopH (x,y) visibleSprites =
 	  if x < 0.0 orelse x >= mapWidthR orelse y < 0.0 orelse y >= mapHeightR orelse slope > 10000.0 orelse (up andalso y-1.0 < 0.0) then
-            ({dist=dist,xHit=xHit,yHit=yHit,xWallHit=xWallHit,yWallHit=yWallHit,wallType=wallType,textureX=textureX},visibleSprites)
+            (hit,visibleSprites)
           else
             let val wallY = Real.floor (if up then y - 1.0 else y)
 	        val wallX = Real.floor x
-                val wt : obj = Array2.sub(Map,wallY,wallX)
-                    handle ? =>
-                           (log ("wallX = " ^ ppInt wallX ^ "; wallY = " ^ ppInt wallY); raise ?)
+                val wt = Array2.sub(Map,wallY,wallX)
+                         handle ? =>
+                                (log ("wallX = " ^ ppInt wallX ^ "; wallY = " ^ ppInt wallY); raise ?)
             in if isWall wt then
                  let val distX = x - !(#x player)
 		     val distY = y - !(#y player)
                      val blockDist = distX*distX + distY*distY
                  in
-		   if not (dist > 0.0) orelse blockDist < dist then
+		   if not (#dist hit > 0.0) orelse blockDist < #dist hit then
                      let val textureX = x - real(Real.floor x)
                          val textureX = if up then 1.0 - textureX else textureX
                          val textureX = 1.0-textureX
-                     in ({dist=blockDist, xHit=x, yHit=y, xWallHit=wallX, yWallHit=wallY, wallType=wt, textureX=textureX},visibleSprites)
+                         val swapScreen = rayAngle < Math.pi
+                     in ({dist=blockDist, xHit=x, yHit=y, xWallHit=wallX, yWallHit=wallY,
+                          wallType=wt, textureX=textureX, swapScreen=swapScreen},visibleSprites)
                      end
-                   else ({dist=dist,xHit=xHit,yHit=yHit,xWallHit=xWallHit,yWallHit=yWallHit,wallType=wallType,textureX=textureX},visibleSprites)
+                   else (hit,visibleSprites)
                  end
-               else loop (x+dXHor,y+dYHor)
-                         (case Array2.sub(spriteMap,wallY,wallX) of
-                            NONE => visibleSprites
-                          | SOME sprite => if !(#visible sprite) then visibleSprites
-                                           else (#visible sprite := true; sprite::visibleSprites))
+               else loopH (x+dXHor,y+dYHor)
+                          (case Array2.sub(spriteMap,wallY,wallX) of
+                               NONE => visibleSprites
+                             | SOME sprite => if !(#visible sprite) then visibleSprites
+                                              else (#visible sprite := true; sprite::visibleSprites))
             end
-      val ({dist,xHit,yHit,xWallHit,yWallHit,wallType,textureX},visibleSprites) = loop(x,y)visibleSprites
+      val ({dist,xHit,yHit,xWallHit,yWallHit,wallType,textureX,swapScreen},visibleSprites) = loopH (x,y) visibleSprites
     in
       if dist <= 0.0 then visibleSprites
       else
-	let val () = drawRay(xHit, yHit)
+	let (*val () = drawRay(xHit, yHit)*)
 	    val	dist = Math.sqrt dist
 	    (* use perpendicular distance to adjust for fish eye
 	     * distorted_dist = correct_dist / cos(relative_angle_of_ray) *)
@@ -619,6 +625,13 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
             val texX = if texX > width-stripWidth then width - stripWidth else texX
 
             val stripdata = Vector.sub(screenStrips, stripIdx)
+
+            val wallType =
+                if swapScreen then
+                  case wallType of ScreenLeft => ScreenRight
+                                 | ScreenRight => ScreenLeft
+                                 | _ => wallType
+                else wallType
 
             val (numTextures, textureOffset, texX, factor) =
                 case wallType of

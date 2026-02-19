@@ -54,11 +54,10 @@ around and look at the different professors...
   proper audio).
 
   The player moves around and interacts with screens, which show
-  presentations. There is a map from screens to presentation objects, where each
-  presentation has a "current page" property.
+  presentations. There is a map from screens to pairs of a presentation object and its current page offset.
 
   When a player is close to a screen, the player may select (by pressing `s`)
-  among slide shows associated with the character who owns the screen. There is
+  among presentations associated with the character who owns the screen. There is
   a mapping from locations to pairs of a screen and an owner.
 
   When a player is close to a screen, the player may also advance or rewind the
