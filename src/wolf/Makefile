@@ -23,9 +23,9 @@ realclean:
 	$(MAKE) clean
 	rm -rf lib
 
-deploy: Makefile favicon.ico lib
+deploy: university.mlb university.sml Makefile favicon.ico lib
 	rm -rf deploy
-	$(SMLTOJS) $(JS_PATH_FLAGS) -o index university.mlb
+	$(SMLTOJS) $(JS_PATH_FLAGS) -o index $<
 	mkdir -p deploy deploy/MLB/Js deploy/basis/MLB/Js
 	mkdir -p deploy/lib/github.com/diku-dk/sml-setmap/map/MLB/Js
 	mkdir -p deploy/lib/github.com/diku-dk/sml-json/MLB/Js

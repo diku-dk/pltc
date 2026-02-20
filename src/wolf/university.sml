@@ -1,3 +1,36 @@
+(* General utilities *)
+
+infix |>
+fun a |> f = f a
+
+fun mapi f xs =
+    let fun loop (i,a,nil) = rev a
+          | loop (i,a,x::xs) = loop(i+1,f(i,x)::a,xs)
+    in loop (0,nil,xs)
+    end
+
+fun ppInt i = if i < 0 then "-" ^ Int.toString (~i) else Int.toString i
+
+fun $ id =
+    case Js.getElementById Js.document id of
+      SOME e => e
+    | NONE => raise Fail ("no element with id '"^id^"' in DOM")
+
+fun println s = print (s ^ "\n")
+
+fun serverGet file =
+    let val file = file ^ "?_=" ^ Real.toString (Time.toReal(Time.now())) (* avoid cache *)
+        open Js.XMLHttpRequest
+        val r = new()
+        val () = openn r {method="GET",url=file,async=false}
+        val () = send r NONE
+    in case response r of
+           SOME res => res
+         | NONE => raise Fail ("serverGet failed on file " ^ file)
+    end
+
+(* Staff *)
+
 structure Staff = struct
 
   datatype lang = DA | EN
@@ -48,8 +81,30 @@ structure Staff = struct
       end
 end
 
+(* Sprite and map object definitions *)
+
+type pid = string (* person id *)
+
+datatype sprite = Table | Armor | Plant | Lamp | Desk | Sink | Toilet
+
+datatype dir = North | South | East | West
+
+datatype obj = Wall | Bulletin | Whiteboard
+             | ShelfLow | ShelfHigh
+             | WindowLeft | WindowCenter | WindowRight
+             | ScreenLeft of dir -> pid option
+             | ScreenRight of dir -> pid option
+             | Sprite of sprite
+             | Space
+             | Wall1 | Wall2 | Wall3
+
+fun isWall Space = false
+  | isWall (Sprite _) = false
+  | isWall _ = true
+
 structure Map = struct
   type map = string list
+  type screen = string*int*int
   type screenMap = (string*int*int)list
   fun loadMapAndScreens (data: string) : map * screenMap =
       let fun loop nil a = (rev a,nil)
@@ -65,28 +120,70 @@ structure Map = struct
                 | _ => raise Fail "Failed to parse screen locations in gameMap.txt"
       in (m,map parseScreen screens)
       end
+
+  fun sq r : real = r * r
+  fun dist (x0,y0) (x,y) = Math.sqrt(sq(real(x0-x)) * sq(real(y0-y)))
+
+  fun findClosest (x,y) screens =
+      let val pdists = map (fn (pid,x0,y0) => (pid,dist(x0,y0)(x,y))) screens
+          fun mini NONE (x::xs) = mini (SOME x) xs
+            | mini (f as SOME(pid,d)) ((pid',d')::xs) =
+              if d' < d then mini (SOME(pid',d')) xs
+              else mini f xs
+            | mini opt nil = opt
+      in case mini NONE pdists of
+             SOME (pid,_) => SOME pid
+           | NONE => NONE
+      end
+
+  fun mkFun (x,y) (screens:screen list) : dir -> pid option =
+      let val north = List.filter (fn s => #3 s <= y) screens  (* include only indicaters to the north *)
+                                  |> findClosest (x,y)
+          val south = List.filter (fn s => #3 s >= y) screens  (* include only indicaters to the south *)
+                                  |> findClosest (x,y)
+          val west = List.filter (fn s => #2 s <= x) screens  (* include only indicaters to the west *)
+                                 |> findClosest (x,y)
+          val east = List.filter (fn s => #2 s >= x) screens  (* include only indicaters to the east *)
+                                 |> findClosest (x,y)
+      in fn North => north
+          | South => south
+          | East => east
+          | West => west
+      end
+
+  fun chToObj screens (x,y) c =
+      case c of
+        #" " => Space
+      | #"w" => Wall1
+      | #"=" => Wall2
+      | #"%" => Wall3
+      | #"M" => ScreenLeft (mkFun (x,y) screens)
+      | #"N" => ScreenRight (mkFun (x,y) screens)
+      | #"a" => WindowLeft
+      | #"b" => WindowCenter
+      | #"c" => WindowRight
+      | #"*" => Wall
+      | #"H" => ShelfLow
+      | #"K" => ShelfHigh
+      | #"O" => Whiteboard
+      | #"I" => Bulletin
+      | #"T" => Sprite Table
+      | #"A" => Sprite Armor
+      | #"P" => Sprite Plant
+      | #"L" => Sprite Lamp
+      | #"D" => Sprite Desk
+      | #"S" => Sprite Sink
+      | #"U" => Sprite Toilet
+      | _ => raise Fail ("unknown character '" ^ Char.toString c ^ "' in map")
+
+  fun line screens (y,s:string) : obj list =
+      CharVector.foldri (fn (x,c,a) => chToObj screens (x,y) c :: a) [] s
+
+  fun load data : obj Array2.array =
+      let val (sm,screens) = loadMapAndScreens data
+      in Array2.fromList (mapi (line screens) sm)
+      end
 end
-
-(* Utilities *)
-fun ppInt i = if i < 0 then "-" ^ Int.toString (~i) else Int.toString i
-
-fun $ id =
-    case Js.getElementById Js.document id of
-      SOME e => e
-    | NONE => raise Fail ("no element with id '"^id^"' in DOM")
-
-fun println s = print (s ^ "\n")
-
-fun serverGet file =
-    let val file = file ^ "?_=" ^ Real.toString (Time.toReal(Time.now())) (* avoid cache *)
-        open Js.XMLHttpRequest
-        val r = new()
-        val () = openn r {method="GET",url=file,async=false}
-        val () = send r NONE
-    in case response r of
-           SOME res => res
-         | NONE => raise Fail ("serverGet failed on file " ^ file)
-    end
 
 local
 
@@ -131,55 +228,10 @@ fun log s = let val log = $"log"
                Js.appendChild log (Js.createElement "br")
             end
 
-(* Load game map from file *)
-val (Smap,ScreenMap) = Map.loadMapAndScreens (serverGet "data/gameMap.txt")
-                       handle exn as Fail msg => (log msg; raise exn)
-
-
-datatype sprite = Table | Armor | Plant | Lamp | Desk | Sink | Toilet
-
-datatype obj = Wall | Bulletin | Whiteboard
-             | ShelfLow | ShelfHigh
-             | WindowLeft | WindowCenter | WindowRight
-             | ScreenLeft | ScreenRight
-             | Sprite of sprite
-             | Space
-             | Wall1 | Wall2 | Wall3
-
-fun isSprite (Sprite _) = true
-  | isSprite _ = false
-
-local
-
-  fun chToObj c =
-      case c of
-        #" " => Space
-      | #"w" => Wall1
-      | #"=" => Wall2
-      | #"%" => Wall3
-      | #"M" => ScreenLeft
-      | #"N" => ScreenRight
-      | #"a" => WindowLeft
-      | #"b" => WindowCenter
-      | #"c" => WindowRight
-      | #"*" => Wall
-      | #"H" => ShelfLow
-      | #"K" => ShelfHigh
-      | #"O" => Whiteboard
-      | #"I" => Bulletin
-      | #"T" => Sprite Table
-      | #"A" => Sprite Armor
-      | #"P" => Sprite Plant
-      | #"L" => Sprite Lamp
-      | #"D" => Sprite Desk
-      | #"S" => Sprite Sink
-      | #"U" => Sprite Toilet
-      | _ => raise Fail ("unknown character '" ^ Char.toString c ^ "'")
-
-  fun line (s:string) : obj list = CharVector.foldr (fn (c,a) => chToObj c :: a) [] s
-in val Map : obj Array2.array = Array2.fromList (List.map line Smap)
-                                handle ? => (log "error loading map"; raise ?)
-end
+(* Load the map *)
+val Map : obj Array2.array =
+    Map.load (serverGet "data/gameMap.txt")
+    handle exn as Fail msg => (log msg; raise exn)
 
 structure Sprite = struct
 
@@ -308,10 +360,6 @@ fun bindKeys () =
 
 infix +=
 fun a += (n:real) = a := !a + n
-
-fun isWall Space = false
-  | isWall (Sprite _) = false
-  | isWall _ = true
 
 fun isBlocking spriteMap (x,y) =
     (y < 0.0 orelse y >= mapHeightR orelse x < 0.0 orelse x >= mapWidthR) orelse
@@ -638,15 +686,28 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
 
             val wallType =
                 if swapScreen then
-                  case wallType of ScreenLeft => ScreenRight
-                                 | ScreenRight => ScreenLeft
+                  case wallType of ScreenLeft f => ScreenRight f
+                                 | ScreenRight f => ScreenLeft f
                                  | _ => wallType
                 else wallType
 
+            fun compFile f =
+                let val dir = if x > xHit then East
+                              else if Real.==(x,xHit) then
+                                if y > yHit then South
+                                else North
+                              else West
+                in case f dir of
+                       SOME pid =>
+                       let val file = "data/" ^ pid ^ "/datoek2026/datoek2026-000.png"
+                       in file
+                       end
+                     | NONE => "wall-white.png"
+                end
             val (numTextures, textureOffset, texX, factor) =
                 case wallType of
-                    ScreenLeft => (Strip.setSrc stripdata "datoek-000.png"; (1,0,texX,2.0))
-                  | ScreenRight => (Strip.setSrc stripdata "datoek-000.png"; (1,0,texX+width,2.0))
+                    ScreenLeft f => (Strip.setSrc stripdata (compFile f); (1,0,texX,2.0))
+                  | ScreenRight f => (Strip.setSrc stripdata (compFile f); (1,0,texX+width,2.0))
                   | WindowLeft => (Strip.setSrc stripdata "window-left.png"; (1,0,texX,1.0))
                   | WindowCenter => (Strip.setSrc stripdata "window-center.png"; (1,0,texX,1.0))
                   | WindowRight => (Strip.setSrc stripdata "window-right.png"; (1,0,texX,1.0))
