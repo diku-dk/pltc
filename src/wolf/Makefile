@@ -1,5 +1,5 @@
 
-MLKIT_ROOT = ~/gits/mlkit/js
+MLKIT_ROOT = $(shell dirname $$(which mlkit))/../lib/smltojs
 
 SMLTOJS ?= smltojs
 
