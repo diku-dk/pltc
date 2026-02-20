@@ -11,23 +11,26 @@ To compile the sources, you need to install [MLKit](https://github.com/melsman/m
 
 ## Compilation
 
-Assuming `smltojs` is installed, simply run `make`:
+Assuming `smltojs` is installed, simply run `make deploy`:
 
 ```
-  $ make
+  $ make deploy
   ...
-  [Created file run.html]
+  [Created file index.html]
+  ...
+  cp -a data deploy/
 ```
 
-To start the program in a browser (on http://localhost:8000), first start a web-server:
+To start the program in a browser (on http://localhost:8000), first start a web-server in the `deploy` folder:
 
 ```
-  $ python -m SimpleHTTPServer 8000
+  $ (cd deploy && python -m SimpleHTTPServer 8000)
 ```
 or
 ```
-  $ python3 -m http.server 8000
+  $ (cd deploy && python3 -m http.server 8000)
 ```
+
 Now, fetch http://localhost:8000. You should see something like the following screen:
 
 ![Screen-dump](screendump.png)
