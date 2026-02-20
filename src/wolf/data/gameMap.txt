@@ -14,8 +14,12 @@
 *  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  LAI
 ****I** **** **** *I* *** *** *I* *** *** *** *MN**
 ******* S*   *     H L * L * L * L * L * L * L ****
-******* S* * * TTA H  T*   *   *  T*   *  T*   ****
-*       S*** * TT  H   *   *   K   *   *   *   ****
+******* S* * * TTA H  T*   N   *  T*   *  T*   ****
+*       S*** * TT  H   *   M   K   *   *   *   ****
 * ** ** **U  * TTA K  T*   *T TH  T*   *   *   ****
 *SU*SU*SU*S T*PTTAPH  A* AT*   H  A* TA*   *   ****
 **********cba*cbaca*cba*cba*cba*cba*cba*cba*cba****
+=
+athas: 28,16
+mael: 17,3
+henglein: 15,3

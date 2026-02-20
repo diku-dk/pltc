@@ -33,7 +33,7 @@ structure Staff = struct
                   List.foldr (fn (j,a) =>
                                  case j of
                                      Json.OBJECT obj =>
-                                     {id=lookStr obj "is",lang=lookLang obj "lang",
+                                     {id=lookStr obj "id",lang=lookLang obj "lang",
                                       pages=lookInt obj "pages"}::a
                                    | _ => fail "ARRAY OBJECT" s) nil j
                 | _ => fail "ARRAY" s
@@ -45,6 +45,25 @@ structure Staff = struct
                 | _ => fail "OBJECT" "ARRAY"
       in
         Json.foldlArrayJson (fn (j,a) => jsonToStaff j :: a) nil data
+      end
+end
+
+structure Map = struct
+  type map = string list
+  type screenMap = (string*int*int)list
+  fun loadMapAndScreens (data: string) : map * screenMap =
+      let fun loop nil a = (rev a,nil)
+            | loop ("="::xs) a = (rev a,xs)
+            | loop (x::xs) a = loop xs (x::a)
+          val (m,screens) = loop (String.tokens (fn c => c= #"\n") data) nil
+          fun parseScreen s =
+              case String.tokens (fn c => c= #":" orelse c= #",") s of
+                  [staffid,x,y] =>
+                  (case (Int.fromString x, Int.fromString y) of
+                       (SOME x, SOME y) => (staffid,x,y)
+                     | _ => raise Fail "Failed to parse integer locations of screens in gameMap.txt")
+                | _ => raise Fail "Failed to parse screen locations in gameMap.txt"
+      in (m,map parseScreen screens)
       end
 end
 
@@ -113,7 +132,9 @@ fun log s = let val log = $"log"
             end
 
 (* Load game map from file *)
-val Smap = String.tokens (fn c => c= #"\n") (serverGet "data/gameMap.txt")
+val (Smap,ScreenMap) = Map.loadMapAndScreens (serverGet "data/gameMap.txt")
+                       handle exn as Fail msg => (log msg; raise exn)
+
 
 datatype sprite = Table | Armor | Plant | Lamp | Desk | Sink | Toilet
 
