@@ -1,9 +1,54 @@
+structure Staff = struct
 
-local
+  datatype lang = DA | EN
+  type slide = {id:string,lang:lang option,pages:int}
+  type staff = {id:string,name:string,office:string,avatar:string,slides:slide list}
 
-val screenWidth    = 1600 div 2
-val screenHeight   = 900 div 2
+  fun loadStaff (data:string) : staff list =
+      let fun fail k s =
+              raise Fail ("Failed to find " ^ k ^ " json object " ^ s ^ " in staff.json")
+          fun look obj s =
+              case Json.objLook obj s of
+                  SOME obj => obj
+                | NONE => fail "" s
+          fun lookStr obj s =
+              case look obj s of
+                  Json.STRING s => s
+                | _ => fail "string" s
+          fun lookInt obj s =
+              case Int.fromString(lookStr obj s) of
+                  SOME i => i
+                | NONE => fail "int" s
+          fun lookLang obj s =
+              case Json.objLook obj s of
+                  SOME(Json.STRING "EN") => SOME EN
+                | SOME(Json.STRING "en") => SOME EN
+                | SOME(Json.STRING "DA") => SOME DA
+                | SOME(Json.STRING "da") => SOME DA
+                | SOME _ => fail "da or en" s
+                | _ => NONE
+          fun lookSlides obj s =
+              case look obj s of
+                  Json.ARRAY j =>
+                  List.foldr (fn (j,a) =>
+                                 case j of
+                                     Json.OBJECT obj =>
+                                     {id=lookStr obj "is",lang=lookLang obj "lang",
+                                      pages=lookInt obj "pages"}::a
+                                   | _ => fail "ARRAY OBJECT" s) nil j
+                | _ => fail "ARRAY" s
+          fun jsonToStaff j : staff =
+              case j of
+                  Json.OBJECT obj => {id=lookStr obj "id",name=lookStr obj "name",
+                                      avatar=lookStr obj "avatar", office=lookStr obj "office",
+                                      slides=lookSlides obj "slides"}
+                | _ => fail "OBJECT" "ARRAY"
+      in
+        Json.foldlArrayJson (fn (j,a) => jsonToStaff j :: a) nil data
+      end
+end
 
+(* Utilities *)
 fun ppInt i = if i < 0 then "-" ^ Int.toString (~i) else Int.toString i
 
 fun $ id =
@@ -12,6 +57,24 @@ fun $ id =
     | NONE => raise Fail ("no element with id '"^id^"' in DOM")
 
 fun println s = print (s ^ "\n")
+
+fun serverGet file =
+    let val file = file ^ "?_=" ^ Real.toString (Time.toReal(Time.now())) (* avoid cache *)
+        open Js.XMLHttpRequest
+        val r = new()
+        val () = openn r {method="GET",url=file,async=false}
+        val () = send r NONE
+    in case response r of
+           SOME res => res
+         | NONE => raise Fail ("serverGet failed on file " ^ file)
+    end
+
+local
+
+(* Print the DOM *)
+val screenWidth    = 1600 div 2
+val screenHeight   = 900 div 2
+
 val _ = println "<html><head>"
 val _ = println "<title>Canvas example</title>"
 val _ = println "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />"
@@ -49,86 +112,8 @@ fun log s = let val log = $"log"
                Js.appendChild log (Js.createElement "br")
             end
 
-val Smap0 = [
-    "***************************",
-    "*   %          %   %   O  %",
-    "*         T        %   L  %",
-    "*   %          %   %      %",
-    "*% %%%%%%%%%%%%%   %%%%% %%",
-    "*      %P     P%      %   %",
-    "*      %       %      %   %",
-    "*      %% %%% %%   L      %",
-    "***** **   *   *      *   *",
-    "*          *   ************",
-    "* L        *              *",
-    "*          *           A  *",
-    "%%%%%%%%%%%%%             *",
-    "%           %%%% %%%%     %",
-    "*   A         *     *     *",
-    "*             *     *******",
-    "*         T   *     *     *",
-    "*             *     *     *",
-    "*             *     *     *",
-    "*    T        *     *     *",
-    "*             *     **** **",
-    "*             *           *",
-    "** ************       T   *",
-    "*                         *",
-    "*                  T    L *",
-    "*                         *",
-    "***************************"
-]
-
-val Smap = [
-    "*********************************H*H***H*H*%%%%%%%%%%%%%%%%%%HHHHHH%%%%%%%%HHHHHHHH%%%%%%HHHHHHH%%%%%%HHHHHHH**",
-    "*         T   T              L *                   %                         %              %                 *",
-    "*  %%%%                        **           L   O  %    P  P                 %              %                 *",
-    "*  %  %  **O*****O***O*        M*                  %                                                A  A      *",
-    "*  %  H                        N*          %%%%%%%%%    P  P                                                  *",
-    "*     %             P          **                  %                                                A  A      *",
-    "*     %    *****          %**********              *    P  P                    L                             *",
-    "*  %  %                        *                   *                       L         L              A  A      *",
-    "*  %  H                     L     L       **       *                                                          *",
-    "*  %  %       A                *                   *                     L      A      L            A  A      *",
-    "*  %%%%              P    %*****                   *                                                          *",
-    "*                              *                   *                       L         L                        *",
-    "*        %%%  %%%              O    L  L  L  L  L  *%%%%                        L                             *",
-    "*        %%%  %%%              *                   *                                                       %%%*",
-    "*    L   %%%  %%%         %***** P                 *                                                          *",
-    "*        %%%  %%%              *        H%H        *                                                          *",
-    "*  H  HO OOOOOOOO OHH  H   P   *                   %                                                          *",
-    "*  H  H             H  H       *         L         %                                                T         *",
-    "*  H  H          T  H  H       *    A              %HH*                                       T           T   *",
-    "*  H  H             H  H       *                   %                                                T         *",
-    "*  H%%HOOOOOOOOOOOOOH%%H       **********                                L                    T           T   *",
-    "*       L                      *           T  A                                                     T         *",
-    "*                           P  *                   %                                                          *",
-    "********************************%%%%%%%%%%%%NM%%%%%%%%%%%%%%%HHHHHH%%%%%%%%HHHHHHHH%%%%%%HHHHHHH%%%%%%HHHHHHH**"
-]
-
-val Smap = [
-   "*abc*abc*abc*abc*abc*abc*abc*abc*abc*abc*abcabcabc*",
-   "*D DKD  *  D*D  *D  K  D*   *T P*   * T *  L   L  *",
-   "*   K   O   H   *   H   *   *   *   * T NL  TTT   O",
-   "*DL H L * L * L N L H L * L * L * L * L ML  TTT  A*",
-   "*   *T  I   *   M   O   *   *   *   *   *A L   L  *",
-   "* L * L * L * L *PLT* L * L * L * L * LT*         *",
-   "*D  ** *H   ** *** **   *   ** *** **  T**I* *  AT*",
-   "*       *               *               *    ******",
-   "******* *KKK**    A***********     *******   * P***",
-   "*TTTTT* ******T L  NTT *     *T L  *******P L  T***",
-   "*       I*****T    M  P*     *T    *******T  * T***",
-   "******* **MN**    P** **** ***     *O*MN**   ******",
-   "*  L  L   L L  L  L  L  L  L  L  L  L  LA L  L  L O",
-   "*  L  L   L L  L  L  L  L  L  L  L  L  L  L  L  LAI",
-   "****I** **** **** *I* *** *** *I* *** *** *** *MN**",
-   "******* S*   *     H L * L * L * L * L * L * L ****",
-   "******* S* * * TTA H  T*   *   *  T*   *  T*   ****",
-   "*       S*** * TT  H   *   *   K   *   *   *   ****",
-   "* ** ** **U  * TTA K  T*   *T TH  T*   *   *   ****",
-   "*SU*SU*SU*S T*PTTAPH  A* AT*   H  A* TA*   *   ****",
-   "**********cba*cbaca*cba*cba*cba*cba*cba*cba*cba****"
-]
+(* Load game map from file *)
+val Smap = String.tokens (fn c => c= #"\n") (serverGet "data/gameMap.txt")
 
 datatype sprite = Table | Armor | Plant | Lamp | Desk | Sink | Toilet
 
@@ -172,6 +157,7 @@ local
 
   fun line (s:string) : obj list = CharVector.foldr (fn (c,a) => chToObj c :: a) [] s
 in val Map : obj Array2.array = Array2.fromList (List.map line Smap)
+                                handle ? => (log "error loading map"; raise ?)
 end
 
 structure Sprite = struct
@@ -245,21 +231,25 @@ val player = {
    rotAcc = ref 0.0
 }
 
+(* Constants *)
+val fov            = 60.0 * Math.pi / 180.0
+val fovHalf        = fov / 2.0
+val twoPI          = Math.pi * 2.0
+val stripWidth     = 1
+val stripWidthR    = real stripWidth
+val miniMapScale   = 8
+val miniMapScaleR  = real miniMapScale
+val rotAccDelta = 0.1
+
+(* Calculation of map-specific constants *)
 val mapWidth       = Array2.nCols Map
 val mapWidthR      = real mapWidth
 val mapHeight      = Array2.nRows Map
 val mapHeightR     = real mapHeight
-val miniMapScale   = 8
-val miniMapScaleR  = real miniMapScale
 val screenWidthR   = real screenWidth
 val screenHeightR  = real screenHeight
-val stripWidth     = 1
-val stripWidthR    = real stripWidth
-val fov            = 60.0 * Math.pi / 180.0
 val numRays        = Real.ceil(screenWidthR / stripWidthR)
-val fovHalf        = fov / 2.0
-val viewDist       = screenWidthR / 2.0 / Math.tan(fovHalf)
-val twoPI          = Math.pi * 2.0
+val viewDist       = screenWidthR / 2.0 / Math.tan fovHalf
 
 fun installDocHandler s (f:int->unit) : unit =
     JsCore.exec1 {stmt="document." ^ s ^ " = function(e) { e = e || window.event; f(e.keyCode); };",
@@ -268,8 +258,6 @@ fun installDocHandler s (f:int->unit) : unit =
 
 fun installOnkeydownHandler f = installDocHandler "onkeydown" f
 fun installOnkeyupHandler f = installDocHandler "onkeyup" f
-
-val rotAccDelta = 0.1
 
 fun bindKeys () =
     let val () = installOnkeydownHandler
@@ -829,14 +817,25 @@ fun initScreen () =
     end
 
 fun init () =
-   let val () = bindKeys()
-       val screenStrips = Vector.fromList (initScreen())
-       val spriteMap = Sprite.init (Sprite.mapItems Map)
-   in drawMiniMap();
-      gameCycle spriteMap;
-      renderCycle screenStrips spriteMap
-   end
+    let val () = bindKeys()
+        val staff = Staff.loadStaff(serverGet "data/staff.json")
+                    handle Fail msg =>
+                           ( log ("Failed to load data/staff.json file: " ^ msg)
+                           ; nil)
+        val screenStrips = Vector.fromList (initScreen())
+        val spriteMap = Sprite.init (Sprite.mapItems Map)
+    in drawMiniMap()
+     ; gameCycle spriteMap
+     ; renderCycle screenStrips spriteMap
+    end
+
+fun setWindowOnload (f: unit -> unit) : unit =
+    let open JsCore infix ==>
+    in exec1{arg1=("a", unit ==> unit),
+             stmt="return window.onload=a;",
+             res=unit} f
+    end
 
 in
-val _ = Js.setTimeout 1 init
+val _ = setWindowOnload init
 end

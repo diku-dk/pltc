@@ -11,17 +11,34 @@ JS_PATH_FLAGS=-js_path_compress -js_path_relative_to $(MLKIT_ROOT)
 all:
 	$(SMLTOJS) university.mlb
 
+lib: sml.pkg
+	smlpkg sync
+
 .PHONY: clean
 clean:
-	rm -rf *~ MLB run.html *.ico deploy
+	rm -rf *~ MLB run.html *.ico deploy data/*~ data/*/*~
 
-deploy: Makefile favicon.ico
+.PHONY: realclean
+realclean:
+	$(MAKE) clean
+	rm -rf lib
+
+deploy: Makefile favicon.ico lib
 	rm -rf deploy
 	$(SMLTOJS) $(JS_PATH_FLAGS) -o index university.mlb
 	mkdir -p deploy deploy/MLB/Js deploy/basis/MLB/Js
+	mkdir -p deploy/lib/github.com/diku-dk/sml-setmap/map/MLB/Js
+	mkdir -p deploy/lib/github.com/diku-dk/sml-json/MLB/Js
 	cp index.html favicon.ico *.png *.gif $(MLKIT_ROOT)/prims.js deploy/
 	cp MLB/Js/*.js deploy/MLB/Js/
+	cp lib/github.com/diku-dk/sml-setmap/map/MLB/Js/*.js deploy/lib/github.com/diku-dk/sml-setmap/map/MLB/Js/
+	cp lib/github.com/diku-dk/sml-json/MLB/Js/*.js deploy/lib/github.com/diku-dk/sml-json/MLB/Js/
 	cp $(MLKIT_ROOT)/basis/MLB/Js/*.js deploy/basis/MLB/Js/
+	cp -a data deploy/
+
+.PHONY: serve
+serve: deploy
+	(cd deploy && python3 -m http.server 8000)
 
 favicon.ico: smltojs_logo_no_text.png
 	magick smltojs_logo_no_text.png \

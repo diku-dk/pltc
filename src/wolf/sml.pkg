@@ -1,0 +1,3 @@
+require {
+  github.com/diku-dk/sml-json 0.1.1 #724043b6d05791a62f91ce999e9ebbed22dd227d
+}

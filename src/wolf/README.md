@@ -1,10 +1,8 @@
----
-title: The Wolf HCØ/PLTC Experience
----
+# The Wolf HCØ/PLTC Experience
 
 This program is a Standard ML port (and a modification) of Jacob Seidelin's
 JavaScript implementation of a Wolfenstein 3D-like game using raycasting [3,4] and
-DOM-manipulations [1,2]. The Standard ML code is translated into JavaScript
+DOM-manipulations [1,2]. The Standard ML code is (re)translated into JavaScript
 using SmlToJs [5].
 
 ## Assumptions
@@ -21,7 +19,16 @@ Assuming `smltojs` is installed, simply run `make`:
   [Created file run.html]
 ```
 
-To start the program in a browser, fetch `run.html`. You should now see the following screen:
+To start the program in a browser (on http://localhost:8000), first start a web-server:
+
+```
+  $ python -m SimpleHTTPServer 8000
+```
+or
+```
+  $ python3 -m http.server 8000
+```
+Now, fetch http://localhost:8000. You should see something like the following screen:
 
 ![Screen-dump](screendump.png)
 
@@ -30,28 +37,27 @@ around and look at the different professors...
 
 ## Notes and Design Aspects
 
-- Support slide shows by using walls of type 5 and 6 next to each
-  other.
-
-  Slides are organised in a folder structure, as follows:
+  - __Data organisation:__ Data is organised in a data folder, as follows:
 
   ```
-  characters/
-    characters.json:["athas","mael",...]
+  data/
+    gameMap.txt
+    staff.json
     athas/
-      character.json:{name:"Troels",avatar:"professor1.gif",office:"01-0-S14"}
-      slides.json:["array-21"]
       array21/
-        meta.json: {pages:"23", voice:"DK"}
-        array21.pdf
-        array21-001.png ...        // slide pages to be viewed
+        array21.pdf           // used only for generating png and txt files
+        array21-000.png ...   // slide pages to be viewed
         array21-023.png
-        array21-001.txt            // text to be spoken
+        array21-001.txt ...   // text to be spoken
+    mael/
+	  array25/
+	  datoek2026/
   ```
 
-  Based on the json-files, we can learn about what files are available and the
-  proper slides can be shown and the proper txt-file can be spoken (with the
-  proper audio).
+  Based on the staff.json-file, we can learn about what slide decks are
+  available and the proper slides can be shown and the proper txt-file can be
+  spoken (with the proper audio). See the current
+  [data/staff.json](data/staff.json) for details about the json layout.
 
   The player moves around and interacts with screens, which show
   presentations. There is a map from screens to pairs of a presentation object and its current page offset.
@@ -66,14 +72,15 @@ around and look at the different professors...
   (`window.speechSynthesis.cancel()`) and the speech synthesis for the new
   current page is started.
 
-  Multi-page pdfs of size 16:9 may be split up into multiple pngs, using
-  the following ImageMagick command - extended to fit in two squares:
+  - __Generating slide decks:__ Multi-page pdfs of size 16:9 may be split up
+  into multiple pngs, using the following ImageMagick command - extended to fit
+  in two squares:
 
   ```
   $ magick -density 288 datoek.pdf -background white -alpha background -alpha off -resize 75% -gravity center -extent 1634x817 datoek-%03d.png
   ```
 
-  Use `gifsicle` to resize (extend) an animated gif:
+  - __Annimated gifs:__ Use `gifsicle` to resize (extend) an animated gif:
   ```
   $ gifsicle --resize 512x512 -i professor1.gif > professor5.gif
   ```
