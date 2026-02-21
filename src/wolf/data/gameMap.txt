@@ -23,3 +23,5 @@
 athas: 28,16
 mael: 17,3
 henglein: 15,3
+hos: 18,10
+guest: 41,4
