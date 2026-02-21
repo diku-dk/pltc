@@ -7,7 +7,9 @@ using SmlToJs [5].
 
 ## Assumptions
 
-To compile the sources, you need to install [MLKit](https://github.com/melsman/mlkit), which includes the SmlToJs compiler `smltojs`.
+To compile the sources, you need to install
+[MLKit](https://github.com/melsman/mlkit), which includes the SmlToJs compiler
+`smltojs`.
 
 ## Compilation
 
@@ -36,13 +38,27 @@ Now, fetch http://localhost:8000. You should see something like the following sc
 ![Screen-dump](screendump.png)
 
 You navigate using keyboard arrows. There is currently no game play. Just walk
-around and look at the different professors...
+around and look at the slide decks in the different staff offices...
+
+The process of building, deploying, and starting the web server may be combined using
+```
+  $ make serve
+```
+
+## Proper Deployment at the PLTC Web Site
+
+To properly deploy the modified sourses into the `pltc` home page, run
+```
+  $ make dodeploy
+```
+and commit and push the changes.
 
 ## Notes and Design Aspects
 
-  - __Data organisation:__ Data is organised in a data folder, as follows:
+### Data organisation
 
-  ```
+Data is organised in a data folder, as follows:
+```
   data/
     gameMap.txt
     staff.json
@@ -55,38 +71,50 @@ around and look at the different professors...
     mael/
 	  array25/
 	  datoek2026/
-  ```
+```
 
-  Based on the staff.json-file, we can learn about what slide decks are
-  available and the proper slides can be shown and the proper txt-file can be
-  spoken (with the proper audio). See the current
-  [data/staff.json](data/staff.json) for details about the json layout.
+Based on the staff.json-file, we can learn about what slide decks are available
+and the proper slides can be shown and the proper txt-file can be spoken (with
+the proper audio). See the current [data/staff.json](data/staff.json) for
+details about the json layout.
 
-  The player moves around and interacts with screens, which show
-  presentations. There is a map from screens to pairs of a presentation object and its current page offset.
+The player moves around and interacts with screens, which show
+presentations. There is a map from screens to pairs of a presentation object and its current page offset.
 
-  When a player is close to a screen, the player may select (by pressing `s`)
-  among presentations associated with the character who owns the screen. There is
-  a mapping from locations to pairs of a screen and an owner.
+When a player is close to a screen, the player may select (by pressing `s`)
+among presentations associated with the character who owns the screen. There is
+a mapping from locations to pairs of a screen and an owner.
 
-  When a player is close to a screen, the player may also advance or rewind the
-  current presentation by pressing `n` (for next) or `p` (for prev). When the
-  current page changes, the current speech synthesis is cancelled
-  (`window.speechSynthesis.cancel()`) and the speech synthesis for the new
-  current page is started.
+When a player is close to a screen, the player may also advance or rewind the
+current presentation by pressing `n` (for next) or `p` (for prev). When the
+current page changes, the current speech synthesis is cancelled
+(`window.speechSynthesis.cancel()`) and the speech synthesis for the new
+current page is started.
 
-  - __Generating slide decks:__ Multi-page pdfs of size 16:9 may be split up
-  into multiple pngs, using the following ImageMagick command - extended to fit
-  in two squares:
+### Generating slide decks
 
-  ```
-  $ magick -density 288 datoek.pdf -background white -alpha background -alpha off -resize 75% -gravity center -extent 1634x817 datoek-%03d.png
-  ```
+Multi-page pdfs of size 16:9 may be split up
+into multiple pngs, using the following ImageMagick command - extended to fit
+in two squares:
+```
+$ magick -density 288 datoek.pdf -background white -alpha background -alpha off -resize 75% -gravity center -extent 1634x817 datoek-%03d.png
+```
 
-  - __Annimated gifs:__ Use `gifsicle` to resize (extend) an animated gif:
-  ```
-  $ gifsicle --resize 512x512 -i professor1.gif > professor5.gif
-  ```
+### Generating a default screen
+
+A default slide, to be located in a staff folder as `default/default-000.png`, may be generated as follows:
+```
+$ magick -background lightblue -fill blue -pointsize 100 -gravity center label:'Fritz Henglein\nOffice: S10' -alpha background -alpha off -extent 1634x817 -resize 75% empty-000.png
+```
+This slide is shown when there are no other slides associated with the staff person.
+
+
+### Annimated gifs
+
+Use `gifsicle` to resize (extend) an animated gif:
+```
+$ gifsicle --resize 512x512 -i professor1.gif > professor5.gif
+```
 
 ## License
 

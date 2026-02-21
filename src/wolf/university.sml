@@ -29,13 +29,23 @@ fun serverGet file =
          | NONE => raise Fail ("serverGet failed on file " ^ file)
     end
 
+fun look (k:'a->bool) (xs:'a list) : 'a option =
+    List.find k xs
+
+fun log s = let val log = $"log"
+            in Js.appendChild log (Js.createTextNode s);
+               Js.appendChild log (Js.createElement "br")
+            end
+
 (* Staff *)
 
 structure Staff = struct
 
+  type sid = string (* staff id *)
+
   datatype lang = DA | EN
   type slide = {id:string,lang:lang option,pages:int}
-  type staff = {id:string,name:string,office:string,avatar:string,slides:slide list}
+  type staff = {id:sid,name:string,office:string,avatar:string,slides:slide list}
 
   fun loadStaff (data:string) : staff list =
       let fun fail k s =
@@ -79,11 +89,47 @@ structure Staff = struct
       in
         Json.foldlArrayJson (fn (j,a) => jsonToStaff j :: a) nil data
       end
+
+  type display_content = {sid:sid,slideIdx:int ref,pngbase:string ref} list
+
+  fun pagesDeck (staff:staff list) sid did =
+      case look (fn {id,...} => id=sid) staff of
+          NONE => NONE
+        | SOME x =>
+          case look (fn {id,...} => id = did) (#slides x) of
+              NONE => NONE
+            | SOME x => SOME(#pages x)
+
+  fun nextSlide (staff:staff list) ({sid,slideIdx,pngbase=ref did}) =
+      case pagesDeck staff sid did of
+          SOME pg => slideIdx := ((!slideIdx + 1) mod pg)
+        | NONE => ()
+
+  fun prevSlide (staff:staff list) ({sid,slideIdx,pngbase=ref did}) =
+      case pagesDeck staff sid did of
+          SOME pg => slideIdx := ((!slideIdx - 1 + pg) mod pg)
+        | NONE => ()
+
+  fun onDeck f (staff:staff list) ({sid,slideIdx,pngbase}) =
+      case look (fn {id,...} => id=sid) staff of
+          NONE => ()
+        | SOME {slides,...} =>
+          let val slides = f slides
+              val did = !pngbase
+              fun loop ((x:slide)::y::xs) = if #id x = did then pngbase := #id y
+                                            else loop (y::xs)
+                | loop _ = case slides of
+                               y::_ => pngbase := #id y
+                             | _ => ()
+          in loop slides
+           ; slideIdx := 0
+          end
+
+  fun nextDeck staff x = onDeck (fn x => x) staff x
+  fun prevDeck staff x = onDeck rev staff x
 end
 
 (* Sprite and map object definitions *)
-
-type pid = string (* person id *)
 
 datatype sprite = Table | Armor | Plant | Lamp | Desk | Sink | Toilet
 
@@ -92,8 +138,8 @@ datatype dir = North | South | East | West
 datatype obj = Wall | Bulletin | Whiteboard
              | ShelfLow | ShelfHigh
              | WindowLeft | WindowCenter | WindowRight
-             | ScreenLeft of dir -> pid option
-             | ScreenRight of dir -> pid option
+             | DisplayLeft of dir -> Staff.sid option
+             | DisplayRight of dir -> Staff.sid option
              | Sprite of sprite
              | Space
              | Wall1 | Wall2 | Wall3
@@ -102,63 +148,74 @@ fun isWall Space = false
   | isWall (Sprite _) = false
   | isWall _ = true
 
-structure Map = struct
+structure Map :
+          sig
+            val load : string -> obj Array2.array * Staff.sid list
+            val findClosestDisplay : int*int -> Staff.sid option
+          end = struct
   type map = string list
-  type screen = string*int*int
-  type screenMap = (string*int*int)list
-  fun loadMapAndScreens (data: string) : map * screenMap =
+  type display = string*int*int
+  fun loadMapAndDisplays (data: string) : map * display list =
       let fun loop nil a = (rev a,nil)
             | loop ("="::xs) a = (rev a,xs)
             | loop (x::xs) a = loop xs (x::a)
-          val (m,screens) = loop (String.tokens (fn c => c= #"\n") data) nil
-          fun parseScreen s =
+          val (m,displays) = loop (String.tokens (fn c => c= #"\n") data) nil
+          fun parseDisplay s =
               case String.tokens (fn c => c= #":" orelse c= #",") s of
                   [staffid,x,y] =>
                   (case (Int.fromString x, Int.fromString y) of
                        (SOME x, SOME y) => (staffid,x,y)
-                     | _ => raise Fail "Failed to parse integer locations of screens in gameMap.txt")
-                | _ => raise Fail "Failed to parse screen locations in gameMap.txt"
-      in (m,map parseScreen screens)
+                     | _ => raise Fail "Failed to parse integer locations of displays in gameMap.txt")
+                | _ => raise Fail "Failed to parse display locations in gameMap.txt"
+      in (m,map parseDisplay displays)
       end
 
   fun sq r : real = r * r
   fun dist (x0,y0) (x,y) = Math.sqrt(sq(real(x0-x)) * sq(real(y0-y)))
 
-  fun findClosest (x,y) screens =
-      let val pdists = map (fn (pid,x0,y0) => (pid,dist(x0,y0)(x,y))) screens
+  fun findClosest (x,y) (displays:display list) : Staff.sid option =
+      let val dists = map (fn (sid,x0,y0) => (sid,dist(x0,y0)(x,y))) displays
           fun mini NONE (x::xs) = mini (SOME x) xs
-            | mini (f as SOME(pid,d)) ((pid',d')::xs) =
-              if d' < d then mini (SOME(pid',d')) xs
+            | mini (f as SOME(sid,d)) ((sid',d')::xs) =
+              if d' < d then mini (SOME(sid',d')) xs
               else mini f xs
             | mini opt nil = opt
-      in case mini NONE pdists of
-             SOME (pid,_) => SOME pid
+      in case mini NONE dists of
+             SOME (sid,_) => SOME sid
            | NONE => NONE
       end
 
-  fun mkFun (x,y) (screens:screen list) : dir -> pid option =
-      let val north = List.filter (fn s => #3 s <= y) screens  (* include only indicaters to the north *)
+  fun mkFun (x,y) (displays:display list) : dir -> Staff.sid option =
+      let val north = List.filter (fn s => #3 s - 1 = y) displays (* include only indicaters to the north *)
                                   |> findClosest (x,y)
-          val south = List.filter (fn s => #3 s >= y) screens  (* include only indicaters to the south *)
+          val south = List.filter (fn s => #3 s + 1 = y) displays (* include only indicaters to the south *)
                                   |> findClosest (x,y)
-          val west = List.filter (fn s => #2 s <= x) screens  (* include only indicaters to the west *)
+          val west = List.filter (fn s => #2 s + 1 = x) displays  (* include only indicaters to the west *)
                                  |> findClosest (x,y)
-          val east = List.filter (fn s => #2 s >= x) screens  (* include only indicaters to the east *)
+          val east = List.filter (fn s => #2 s - 1 = x) displays  (* include only indicaters to the east *)
                                  |> findClosest (x,y)
+          fun nosome (SOME s) = s | nosome NONE = "none"
+(*
+          val () = log (Int.toString x ^ "," ^ Int.toString y ^ ":" ^
+                        "N:" ^ nosome north ^
+                        ", S:" ^ nosome south ^
+                        ", E:" ^ nosome east ^
+                        ", W:" ^ nosome west)
+*)
       in fn North => north
           | South => south
           | East => east
           | West => west
       end
 
-  fun chToObj screens (x,y) c =
+  fun chToObj displays (x,y) c =
       case c of
         #" " => Space
       | #"w" => Wall1
       | #"=" => Wall2
       | #"%" => Wall3
-      | #"M" => ScreenLeft (mkFun (x,y) screens)
-      | #"N" => ScreenRight (mkFun (x,y) screens)
+      | #"M" => DisplayLeft (mkFun (x,y) displays)
+      | #"N" => DisplayRight (mkFun (x,y) displays)
       | #"a" => WindowLeft
       | #"b" => WindowCenter
       | #"c" => WindowRight
@@ -176,14 +233,26 @@ structure Map = struct
       | #"U" => Sprite Toilet
       | _ => raise Fail ("unknown character '" ^ Char.toString c ^ "' in map")
 
-  fun line screens (y,s:string) : obj list =
-      CharVector.foldri (fn (x,c,a) => chToObj screens (x,y) c :: a) [] s
+  fun line displays (y,s:string) : obj list =
+      CharVector.foldri (fn (x,c,a) => chToObj displays (x,y) c :: a) [] s
 
-  fun load data : obj Array2.array =
-      let val (sm,screens) = loadMapAndScreens data
-      in Array2.fromList (mapi (line screens) sm)
+  val dsps : display list ref = ref nil
+
+  fun load (data:string) : obj Array2.array * string list =
+      let val (sm,displays) = loadMapAndDisplays data
+          val () = dsps := displays
+      in ( Array2.fromList (mapi (line displays) sm)
+         , map #1 displays
+         )
       end
+
+  fun findClosestDisplay (x,y) : Staff.sid option =
+      findClosest (x,y) (!dsps)
+
 end
+
+fun findDisplayState (displayContent:Staff.display_content) (sid:Staff.sid) =
+    List.find (fn {sid=sid',slideIdx,pngbase} => sid = sid') displayContent
 
 local
 
@@ -223,13 +292,8 @@ val _ = println "</div>"
 val _ = println "<div id='log'></div>"
 val _ = println "</center></body></html>"
 
-fun log s = let val log = $"log"
-            in Js.appendChild log (Js.createTextNode s);
-               Js.appendChild log (Js.createElement "br")
-            end
-
 (* Load the map *)
-val Map : obj Array2.array =
+val (Map,staffids) : obj Array2.array * string list =
     Map.load (serverGet "data/gameMap.txt")
     handle exn as Fail msg => (log msg; raise exn)
 
@@ -332,8 +396,19 @@ fun installDocHandler s (f:int->unit) : unit =
 fun installOnkeydownHandler f = installDocHandler "onkeydown" f
 fun installOnkeyupHandler f = installDocHandler "onkeyup" f
 
-fun bindKeys () =
-    let val () = installOnkeydownHandler
+fun bindKeys staff displayContent =
+    let fun onDisplayContent f =
+            let val x = floor (!(#x player))
+                val y = floor (!(#y player))
+            in case Map.findClosestDisplay (x,y) of
+                   NONE => ()
+                 | SOME sid =>
+                   case findDisplayState displayContent sid of
+                       NONE => ()
+                     | SOME dc => f dc
+            end
+
+        val () = installOnkeydownHandler
                      (fn 38 => #speed player := 1.0   (* up, move player forward, ie. increase speed *)
 	               | 40 => #speed player := ~1.0  (* down, move player backward, set negative speed *)
 	               | 37 => let val rotAcc = #rotAcc player
@@ -346,7 +421,16 @@ fun bindKeys () =
                                   then rotAcc := !rotAcc + rotAccDelta  (* right, rotate player right *)
                                   else ()
                                end
-                       | _ => ()
+             (*p*)     | 112 => onDisplayContent (Staff.prevSlide staff)
+             (*P*)     | 80 => onDisplayContent (Staff.prevSlide staff)
+             (*n*)     | 110 => onDisplayContent (Staff.nextSlide staff)
+             (*N*)     | 78 => onDisplayContent (Staff.nextSlide staff)
+             (* *)     | 32 => onDisplayContent (Staff.nextSlide staff)
+             (*a*)     | 97 => onDisplayContent (Staff.prevDeck staff)
+             (*A*)     | 65 => onDisplayContent (Staff.prevDeck staff)
+             (*s*)     | 115 => onDisplayContent (Staff.nextDeck staff)
+             (*S*)     | 83 => onDisplayContent (Staff.nextDeck staff)
+                       | _ => (*log ("Received: " ^ Int.toString i)*) ()
                      )
         val () = installOnkeyupHandler
                      (fn 38 => #speed player := 0.0     (* stop the player movement when up/down key is released *)
@@ -551,7 +635,9 @@ structure Strip = struct
       end
 end
 
-fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAngle, stripIdx, visibleSprites) =
+fun castSingleRay displayContent screenStrips
+                  (spriteMap: Sprite.t option Array2.array)
+                  (rayAngle, stripIdx, visibleSprites) =
     let
       (* make sure the angle is between 0 and 360 degrees *)
       val rayAngle = RealMod (rayAngle, twoPI)
@@ -579,7 +665,9 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
       val x = real x
       val y = !(#y player) + (x - (!(#x player))) * slope (* starting vertical position. We add the small horizontal step we just made, multiplied by the slope. *)
 
-      val emptyHit = {xHit = 0.0, yHit = 0.0, dist = 0.0, textureX = 0.0, xWallHit = 0, yWallHit = 0, wallType = Space, swapScreen = false}
+      datatype hitkind = Vhit | Hhit
+
+      val emptyHit = {xHit = 0.0, yHit = 0.0, dist = 0.0, textureX = 0.0, xWallHit = 0, yWallHit = 0, wallType = Space, swapDisplay = false, hitkind=Vhit}
 
       fun loopV (x, y) visibleSprites =
           if x < 0.0 orelse x >= mapWidthR orelse y < 0.0 orelse y >= mapHeightR then
@@ -600,10 +688,10 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
                                                             * on the texture that we'll use later when texturing the wall. *)
                     val textureX = if not right then 1.0 - textureX else textureX (* if we're looking to the left side of the
                                                                                    * map, the texture should be reversed *)
-                    val swapScreen = rayAngle < Math.pi/2.0 orelse rayAngle > 3.0*Math.pi/2.0
+                    val swapDisplay = rayAngle < Math.pi/2.0 orelse rayAngle > 3.0*Math.pi/2.0
                 in (* save the coordinates of the hit. We only really use these to draw the rays on minimap *)
                   ({xHit=x, yHit=y, wallType=wt, dist=dist, xWallHit=wallX,
-                    yWallHit=wallY, textureX=textureX, swapScreen=swapScreen},visibleSprites)
+                    yWallHit=wallY, textureX=textureX, swapDisplay=swapDisplay,hitkind=Vhit},visibleSprites)
                 end
               else
                 loopV (x+dXVer,y+dYVer)
@@ -643,9 +731,9 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
                      let val textureX = x - real(Real.floor x)
                          val textureX = if up then 1.0 - textureX else textureX
                          val textureX = 1.0-textureX
-                         val swapScreen = rayAngle < Math.pi
+                         val swapDisplay = rayAngle < Math.pi
                      in ({dist=blockDist, xHit=x, yHit=y, xWallHit=wallX, yWallHit=wallY,
-                          wallType=wt, textureX=textureX, swapScreen=swapScreen},visibleSprites)
+                          wallType=wt, textureX=textureX, swapDisplay=swapDisplay,hitkind=Hhit},visibleSprites)
                      end
                    else (hit,visibleSprites)
                  end
@@ -655,7 +743,8 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
                              | SOME sprite => if !(#visible sprite) then visibleSprites
                                               else (#visible sprite := true; sprite::visibleSprites))
             end
-      val ({dist,xHit,yHit,xWallHit,yWallHit,wallType,textureX,swapScreen},visibleSprites) = loopH (x,y) visibleSprites
+      val ({dist,xHit,yHit,xWallHit,yWallHit,wallType,textureX,swapDisplay,hitkind},visibleSprites) =
+          loopH (x,y) visibleSprites
     in
       if dist <= 0.0 then visibleSprites
       else
@@ -685,29 +774,32 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
             val stripdata = Vector.sub(screenStrips, stripIdx)
 
             val wallType =
-                if swapScreen then
-                  case wallType of ScreenLeft f => ScreenRight f
-                                 | ScreenRight f => ScreenLeft f
+                if swapDisplay then
+                  case wallType of DisplayLeft f => DisplayRight f
+                                 | DisplayRight f => DisplayLeft f
                                  | _ => wallType
                 else wallType
 
             fun compFile f =
-                let val dir = if x > xHit then East
-                              else if Real.==(x,xHit) then
-                                if y > yHit then South
-                                else North
-                              else West
+                let val dir = case hitkind of
+                                  Vhit => if !(#x player) > xHit then East else West
+                                | Hhit => if !(#y player) > yHit then South else North
                 in case f dir of
-                       SOME pid =>
-                       let val file = "data/" ^ pid ^ "/datoek2026/datoek2026-000.png"
-                       in file
-                       end
+                       SOME sid =>
+                       (case findDisplayState displayContent sid of
+                            SOME {sid= _, slideIdx=ref i, pngbase=ref b} =>
+                            let fun pre n = if size n < 3 then pre ("0" ^ n)
+                                            else n
+                                val file = "data/" ^ sid ^ "/" ^ b ^ "/" ^ b ^ "-" ^ pre(Int.toString i) ^ ".png"
+                            in file
+                            end
+                          | NONE => "wall-white.png")
                      | NONE => "wall-white.png"
                 end
             val (numTextures, textureOffset, texX, factor) =
                 case wallType of
-                    ScreenLeft f => (Strip.setSrc stripdata (compFile f); (1,0,texX,2.0))
-                  | ScreenRight f => (Strip.setSrc stripdata (compFile f); (1,0,texX+width,2.0))
+                    DisplayLeft f => (Strip.setSrc stripdata (compFile f); (1,0,texX,2.0))
+                  | DisplayRight f => (Strip.setSrc stripdata (compFile f); (1,0,texX+width,2.0))
                   | WindowLeft => (Strip.setSrc stripdata "window-left.png"; (1,0,texX,1.0))
                   | WindowCenter => (Strip.setSrc stripdata "window-center.png"; (1,0,texX,1.0))
                   | WindowRight => (Strip.setSrc stripdata "window-right.png"; (1,0,texX,1.0))
@@ -750,7 +842,7 @@ fun castSingleRay screenStrips (spriteMap: Sprite.t option Array2.array) (rayAng
         end
     end
 
-fun castRays screenStrips spriteMap =
+fun castRays displayContent screenStrips spriteMap =
     (* we accumulate the collected visible sprites *)
     let fun loop i acc =
             if i >= numRays then acc
@@ -766,7 +858,7 @@ fun castRays screenStrips spriteMap =
 		 * right triangle: a = sin(A) * c *)
 		val rayAngle = Math.asin(rayScreenPos / rayViewDist)
                 val acc =
-		    castSingleRay screenStrips spriteMap
+		    castSingleRay displayContent screenStrips spriteMap
                                   (!(#rot player) + rayAngle, (* add the players viewing direction to get the angle in world space *)
 			           i, acc)
               in loop(i + 1) acc
@@ -859,12 +951,12 @@ fun clearSprites sprites =
 
 val score = ref 0
 
-fun renderCycle screenStrips spriteMap =
+fun renderCycle displayContent screenStrips spriteMap =
     let val renderCycleDelay = 1000 div 30 (* aim for 30 FPS *)
         fun cycle (lastRenderCycleTime,oldSprites) () =
             let val () = updateMiniMap()
                 val () = clearSprites oldSprites
-                val sprites = castRays screenStrips spriteMap
+                val sprites = castRays displayContent screenStrips spriteMap
                 val () = renderSprites oldSprites sprites
                 val n = now()
                 val timeDelta = n - lastRenderCycleTime
@@ -898,17 +990,29 @@ fun initScreen () =
     in loop 0
     end
 
+fun png0FirstSlideDeck (staff:Staff.staff list) (sid:Staff.sid) : string =
+    case List.find (fn {id,...} => id = sid) staff of
+        SOME (s:Staff.staff) =>
+        (case #slides s of
+             nil => "default"
+           | (sl:Staff.slide) :: _ => #id sl)
+      | NONE => "default"
+
 fun init () =
-    let val () = bindKeys()
-        val staff = Staff.loadStaff(serverGet "data/staff.json")
+    let val staff = Staff.loadStaff(serverGet "data/staff.json")
                     handle Fail msg =>
                            ( log ("Failed to load data/staff.json file: " ^ msg)
                            ; nil)
         val screenStrips = Vector.fromList (initScreen())
         val spriteMap = Sprite.init (Sprite.mapItems Map)
+        (* Each staff owns a display state *)
+        val displayContent = map (fn sid => {sid=sid, slideIdx=ref 0,
+                                             pngbase=ref (png0FirstSlideDeck staff sid)})
+                                 staffids
+        val () = bindKeys staff displayContent
     in drawMiniMap()
      ; gameCycle spriteMap
-     ; renderCycle screenStrips spriteMap
+     ; renderCycle displayContent screenStrips spriteMap
     end
 
 fun setWindowOnload (f: unit -> unit) : unit =

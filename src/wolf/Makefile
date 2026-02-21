@@ -7,6 +7,8 @@ SRC_ROOT=$(shell pwd)
 
 JS_PATH_FLAGS=-js_path_compress -js_path_relative_to $(MLKIT_ROOT)
 
+STAFF=grep ':' data/gameMap.txt | sed -e 's/\([a-z]*\).*/\1/g'
+
 .PHONY: all
 all:
 	$(SMLTOJS) university.mlb

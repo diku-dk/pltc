@@ -1,4 +1,13 @@
-[{id:"athas",name:"Troels Henriksen",office:"S14",avatar:"professor3.gif",slides:[]},
+[{id:"athas",name:"Troels Henriksen",office:"S14",avatar:"professor3.gif",
+  slides:[{id:"hlpp2020",lang:"EN",pages:"45"},
+	  {id:"pldi2017",lang:"EN",pages:"56"}
+	 ]},
  {id:"mael",name:"Martin Elsman",office:"S15",avatar:"professor1.gif",
-  slides:[{id:"datoek2026",lang:"DA",pages:"1"}]
+  slides:[{id:"datoek2026",lang:"DA",pages:"24"},
+	  {id:"array2025",lang:"EN",pages:"18"},
+	  {id:"wqs2025",lang:"EN",pages:"11"},
+	  {id:"tensor2021",lang:"EN",pages:"22"},
+	  {id:"dyalog2017",lang:"EN",pages:"21"},
+	  {id:"ml2010",lang:"EN",pages:"24"}
+	 ]
  }]
