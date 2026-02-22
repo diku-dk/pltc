@@ -37,6 +37,21 @@ fun log s = let val log = $"log"
                Js.appendChild log (Js.createElement "br")
             end
 
+fun windowInnerWidth () =
+    JsCore.exec0 {stmt="return window.innerWidth;",res=JsCore.int} ()
+
+fun windowInnerHeight () =
+    JsCore.exec0 {stmt="return window.innerHeight;",res=JsCore.int} ()
+
+fun isMobile () =
+    windowInnerWidth () <= 1000 andalso windowInnerHeight () <= 1000
+
+val deviceStr = if isMobile() then "mobile" else "stationary"
+
+val deviceStr = Int.toString (windowInnerWidth()) ^ "x" ^ Int.toString(windowInnerHeight())
+
+val minimap_p = not (isMobile())
+
 (* Staff *)
 
 structure Staff = struct
@@ -171,7 +186,7 @@ structure Map :
       end
 
   fun sq r : real = r * r
-  fun dist (x0,y0) (x,y) = Math.sqrt(sq(real(x0-x)) * sq(real(y0-y)))
+  fun dist (x0,y0) (x,y) = Math.sqrt(sq(real(x0-x)) + sq(real(y0-y)))
 
   fun findClosest (x,y) (displays:display list) : Staff.sid option =
       let val dists = map (fn (sid,x0,y0) => (sid,dist(x0,y0)(x,y))) displays
@@ -257,38 +272,42 @@ fun findDisplayState (displayContent:Staff.display_content) (sid:Staff.sid) =
 local
 
 (* Print the DOM *)
-val screenWidth    = 1600 div 2
-val screenHeight   = 900 div 2
+val screenWidth    = if isMobile() then windowInnerWidth() else 1600 div 2
+val screenHeight   = if isMobile() then windowInnerHeight() else 900 div 2
 
 val _ = println "<html><head>"
 val _ = println "<title>Canvas example</title>"
 val _ = println "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />"
 val _ = println "<style>"
-val _ = println "div#minimapcontainer { position : absolute; width : 100%; }"
-val _ = println ("canvas#minimap { position : absolute; width : " ^ ppInt screenWidth ^ "px; }")
-val _ = println ("canvas#minimapobjects { position : absolute; width : " ^ ppInt screenWidth ^ "px; }")
+val _ = if not (isMobile()) then
+          ( println "div#minimapcontainer { display : flex; justify-content : center; align-items : center; margin: 10px;}"
+          ; println ("canvas#minimap { position : absolute; width : " ^ ppInt screenWidth ^ "px; }")
+          ; println ("canvas#minimapobjects { position : absolute; width : " ^ ppInt screenWidth ^ "px; }")
+          )
+        else ()
 val _ = println "div#floor { position : absolute; width : 100%; height : 100%; background-color : rgb(128,128,128); z-index : -10000000; }"
 val _ = println "div#ceiling { position : absolute; width : 100%; height : 50%; background-color : rgb(96,96,96); z-index : -10000000; }"
-val _ = println ("#screen { position : relative; width : " ^ ppInt screenWidth ^ "px; height : " ^ ppInt screenHeight ^ "px; border : 1px solid black; overflow : hidden; }")
+val _ = println ("#screen { position : relative; width : " ^ ppInt screenWidth ^ "px; height : " ^ ppInt screenHeight ^ "px; border : 0px; overflow : hidden; }")
 val _ = println ("div#overlay { position : absolute; display : block; width : " ^
                  ppInt (screenWidth - 10) ^ "px; height : " ^ ppInt (screenHeight - 10) ^
                  "px; padding : 5px; color : white; font-family : lucida console, courier new; font-size : 20px; z-index : 1; }")
-val _ = println ("div#score { position : relative; display : block; width : " ^
-                 ppInt (screenWidth - 10) ^ "px; height : " ^ ppInt 30 ^
-                 "px; padding : 5px; color : blue; font-family : lucida console, courier new; font-size : 20px; z-index : 1; }")
+val _ = if isMobile() then
+          println ("html, body {margin: 0; height: 100%; overflow: hidden}")
+        else ()
 val _ = println "</style>"
 val _ = println "</head><body><center>"
-val _ = println "<h2>The PLTC Hallway!</h2>"
 val _ = println "<div id='screen'>"
 val _ = println "<div id='floor'></div>"
 val _ = println "<div id='ceiling'></div>"
 val _ = println "<div id='overlay'></div>"
 val _ = println "</div>"
-val _ = println "<div id='score'> </div>"
-val _ = println "<div id='minimapcontainer'>"
-val _ = println "<canvas id='minimap'></canvas>"
-val _ = println "<canvas id='minimapobjects'></canvas>"
-val _ = println "</div>"
+val _ = if not(isMobile()) then
+          ( println "<div id='minimapcontainer'>"
+          ; println "<canvas id='minimap'></canvas>"
+          ; println "<canvas id='minimapobjects'></canvas>"
+          ; println "</div>"
+          )
+        else ()
 val _ = println "<div id='log'></div>"
 val _ = println "</center></body></html>"
 
@@ -514,8 +533,6 @@ structure C = Canvas
 
 fun getElemProperty e t s =
     JsCore.getProperty (Js.Element.toForeignPtr e) t s
-
-val minimap_p = true
 
 fun updateMiniMap () =
     if not minimap_p then ()
@@ -903,10 +920,7 @@ fun textUpdater id pp =
     end
 
 val updateOverlay =
-    textUpdater "overlay" (fn x => "FPS: " ^ Real.fmt (StringCvt.FIX (SOME 0)) x)
-
-val updateScore =
-    textUpdater "score" (fn x => "SCORE: " ^ Int.toString x)
+    textUpdater "overlay" (fn (fps,score) => "FPS: " ^ Real.fmt (StringCvt.FIX (SOME 0)) fps ^ " | SCORE: " ^ Int.toString score ^ " | " ^ deviceStr)
 
 fun renderSprites oldSprites sprites =
     (List.app (fn s:Sprite.t =>
@@ -966,8 +980,7 @@ fun renderCycle displayContent screenStrips spriteMap =
                 val cycleDelay = IntInf.toInt cycleDelay
 	        val _ =	Js.setTimeout cycleDelay (cycle (n,sprites))
                 val fps = 1000.0 / real (IntInf.toInt timeDelta)
-            in updateOverlay fps;
-               updateScore (!score)
+            in updateOverlay (fps,!score)
             end
     in cycle (0,[]) ()
     end
