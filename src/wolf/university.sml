@@ -29,6 +29,23 @@ fun serverGet file =
          | NONE => raise Fail ("serverGet failed on file " ^ file)
     end
 
+fun serverGetAsync file (f:string option -> unit) : unit =
+    let val file = file ^ "?_=" ^ Real.toString (Time.toReal(Time.now())) (* avoid cache *)
+        open Js.XMLHttpRequest
+        val r = new()
+        val () = openn r {method="GET",url=file,async=true}
+        val () = onStateChange r (fn () =>
+                                     case status r of
+                                         SOME 200 =>
+                                         (case response r of
+                                              SOME res => f (SOME res)
+                                            | NONE => f NONE (* weird *))
+                                       | SOME _ => f NONE
+                                       | NONE => ())
+        val () = send r NONE
+    in ()
+    end
+
 fun look (k:'a->bool) (xs:'a list) : 'a option =
     List.find k xs
 
@@ -46,11 +63,38 @@ fun windowInnerHeight () =
 fun isMobile () =
     windowInnerWidth () <= 1000 andalso windowInnerHeight () <= 1000
 
+fun prefixzeros i s = if size s < i then prefixzeros i ("0" ^ s)
+                      else s
+
 val deviceStr = if isMobile() then "mobile" else "stationary"
 
 val deviceStr = Int.toString (windowInnerWidth()) ^ "x" ^ Int.toString(windowInnerHeight())
 
 val minimap_p = not (isMobile())
+
+
+datatype lang = DA | EN
+
+fun speak (lang:lang) (txt:string) =
+    let val lan = case lang of DA => "dk-DA" | EN => "en-GB"
+        val synth = JsCore.exec0{stmt="return window.speechSynthesis;",
+                                 res=JsCore.fptr} ()
+        val () = JsCore.exec1{stmt="synth.cancel();",
+                              arg1=("synth",JsCore.fptr),
+                              res=JsCore.unit} synth
+        val _ = JsCore.exec0{stmt="window.utterances = [];", res=JsCore.unit} ()
+        val msg = JsCore.exec1{stmt="return new SpeechSynthesisUtterance(txt);",
+                               arg1=("txt",JsCore.string),
+                               res=JsCore.fptr} txt
+        val () = JsCore.exec1{stmt="window.utterances.push(u);",
+                              arg1=("u",JsCore.fptr),
+                              res=JsCore.unit} msg
+        val () = JsCore.setProperty msg JsCore.string "lang" lan
+    in JsCore.exec2{stmt="synth.speak(msg);",
+                    arg1=("synth",JsCore.fptr),
+                    arg2=("msg",JsCore.fptr),
+                    res=JsCore.unit} (synth,msg)
+    end
 
 (* Staff *)
 
@@ -58,7 +102,6 @@ structure Staff = struct
 
   type sid = string (* staff id *)
 
-  datatype lang = DA | EN
   type slide = {id:string,lang:lang option,pages:int}
   type staff = {id:sid,name:string,office:string,avatar:string,slides:slide list}
 
@@ -416,7 +459,12 @@ fun installOnkeydownHandler f = installDocHandler "onkeydown" f
 fun installOnkeyupHandler f = installDocHandler "onkeyup" f
 
 fun bindKeys staff displayContent =
-    let fun onDisplayContent f =
+    let fun startSpeak {sid,slideIdx=ref idx,pngbase=ref base} : unit =
+          let val src = "data/" ^ sid ^ "/" ^ base ^ "/" ^ base ^ "-" ^ prefixzeros 3 (Int.toString idx) ^ ".txt"
+          in serverGetAsync src (fn NONE => speak EN ""
+                                  | SOME txt => speak EN txt)
+          end
+        fun onDisplayContent f =
             let val x = floor (!(#x player))
                 val y = floor (!(#y player))
             in case Map.findClosestDisplay (x,y) of
@@ -424,9 +472,8 @@ fun bindKeys staff displayContent =
                  | SOME sid =>
                    case findDisplayState displayContent sid of
                        NONE => ()
-                     | SOME dc => f dc
+                     | SOME dc => (f dc; startSpeak dc)
             end
-
         val () = installOnkeydownHandler
                      (fn 38 => #speed player := 1.0   (* up, move player forward, ie. increase speed *)
 	               | 40 => #speed player := ~1.0  (* down, move player backward, set negative speed *)
@@ -805,9 +852,7 @@ fun castSingleRay displayContent screenStrips
                        SOME sid =>
                        (case findDisplayState displayContent sid of
                             SOME {sid= _, slideIdx=ref i, pngbase=ref b} =>
-                            let fun pre n = if size n < 3 then pre ("0" ^ n)
-                                            else n
-                                val file = "data/" ^ sid ^ "/" ^ b ^ "/" ^ b ^ "-" ^ pre(Int.toString i) ^ ".png"
+                            let val file = "data/" ^ sid ^ "/" ^ b ^ "/" ^ b ^ "-" ^ prefixzeros 3 (Int.toString i) ^ ".png"
                             in file
                             end
                           | NONE => "wall-white.png")
