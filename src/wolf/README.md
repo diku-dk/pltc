@@ -116,6 +116,14 @@ Use `gifsicle` to resize (extend) an animated gif:
 $ gifsicle --resize 512x512 -i professor1.gif > professor5.gif
 ```
 
+### Floor
+
+We may implement a floor using the technique demonstrated at
+https://codepen.io/melsman/pen/PwGYEXg
+
+The technique needs to be tweaked to implement the correct perspective and the
+angle (the `rotateZ` transform) is not directly the angle of view...
+
 ## License
 
 MIT-License.

@@ -1,0 +1,5 @@
+Hi! I am Martin Elsman. I work on design and implementation of programming languages.
+
+I am also head of the BSc study programme on computer science and economics.
+
+Use the s-key to proceed to the next slide deck.

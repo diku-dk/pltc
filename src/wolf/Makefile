@@ -52,3 +52,27 @@ favicon.ico: smltojs_logo_no_text.png
 dodeploy: deploy
 	rm -rf ../../wolfgame
 	cp -pa deploy ../../wolfgame
+
+DEFAULTPNGS=data/henglein/default/default-000.png data/athas/default/default-000.png data/mael/default/default-000.png
+
+.PHONY: defaultpngsclean
+defaultpngsclean:
+	rm -rf $(DEFAULTPNGS)
+
+.PHONY: defaultpngs
+defaultpngs: $(DEFAULTPNGS)
+
+.PHONY: magickpng
+magickpng:
+	magick -background lightblue -fill blue -pointsize 100 -gravity center label:'$(PNGLABEL)' \
+          -alpha background -alpha off -extent 1634x817 \( $(PNGPIC) -resize 350x350 \) -geometry +50+0 \
+          -gravity west -composite -resize 75% $(PNGTARGET)
+
+data/henglein/default/default-000.png: ../../doc/pics/henglein.jpg
+	PNGLABEL='Fritz Henglein\nOffice: S10' PNGPIC=$< PNGTARGET=$@ $(MAKE) magickpng
+
+data/athas/default/default-000.png: ../../doc/pics/troels.jpg
+	PNGLABEL='Troels Henriksen\nOffice: S14' PNGPIC=$< PNGTARGET=$@ $(MAKE) magickpng
+
+data/mael/default/default-000.png: ../../doc/pics/melsman.jpg
+	PNGLABEL='Martin Elsman\nOffice: S15' PNGPIC=$< PNGTARGET=$@ $(MAKE) magickpng
