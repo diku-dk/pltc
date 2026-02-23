@@ -559,9 +559,15 @@ fun minimum (a:real) b = if a > 0.0 then
 fun move spriteMap gameCycleDelay timeDelta =
     let val mul = real (IntInf.toInt timeDelta) / real (IntInf.toInt gameCycleDelay)
         val moveStep = mul * !(#speed player) * #moveSpeed player (* player will move this far along the current direction vector *)
-        val () = #rotSpeed player := minimum (!(#rotSpeed player) + !(#rotAcc player)) 2.0
+        val () = #rotSpeed player := minimum (!(#rotSpeed player) + !(#rotAcc player)) 2.0   (* don't rotate faster than 2.0 *)
         val drot = mul * !(#rotSpeed player) * MaxRotSpeed        (* add rotation if player is rotating (!player#dir <> 0) *)
-	val () = #rot player += drot
+	val () =
+            let val rot = !(#rot player) + drot
+                val rot = if rot > twoPI then rot-twoPI
+                          else if rot < ~twoPI then rot+twoPI
+                          else rot
+            in #rot player := rot
+            end
         val dx = Math.cos(!(#rot player)) * moveStep
         val dy = Math.sin(!(#rot player)) * moveStep
 (*
